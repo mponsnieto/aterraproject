@@ -14,10 +14,3 @@ Esta herramienta permite calcular el potencial de un proyecto de agrivoltaica a 
 2. Introduce los datos.
 3. Presiona **Calcular**.
 4. Opcionalmente descarga los resultados como PDF.
-
-## Publicación online (GitHub Pages)
-
-1. Sube este repositorio a GitHub
-2. Ve a **Settings > Pages**
-3. Activa Pages desde la rama `main` y carpeta raíz `/`
-4. Tu calculadora estará disponible online

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulador Proyectos Agrivoltaica - Proyecto ATERRA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f0f4f8;
+    }
+    h1 {
+      text-align: center;
+    }
+    .calculator {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #2e8b57;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e8f5e9;
+      border-radius: 8px;
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <h1>Simulador Proyectos Agrivoltaica - Proyecto ATERRA</h1>
+  <div style="display: flex; justify-content: center; gap: 20px; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: center; gap: 40px; align-items: center;">
+    <a href="https://clusterteib.com" target="_blank" rel="noopener">
+      <img src="images/logoCluster.png" alt="Logo Clúster TEIB" style="height: 50px;">
+    </a>
+    <a href="https://www.uib.cat" target="_blank" rel="noopener">
+      <img src="images/logoUIB.png" alt="Logo UIB" style="height: 50px;">
+    </a>
+    </div>
+
+  </div>
+  <div class="calculator" id="calculator">
+  <div class="form-sections" style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <!-- Columna Ubicación y cultivo -->
+    <div style="flex: 1; min-width: 250px;">
+      <h3>Ubicación</h3>
+      <label>Superficie disponible (m²):</label>
+      <input type="number" id="area" placeholder="Ej: 1000" value="1000">
+
+      <label>Coordenadas (latitud, longitud):</label>
+      <input type="number" id="latitud" placeholder="Ej: 1000" value="3">
+      <input type="number" id="longitud" placeholder="Ej: 1000" value="3">
+
+      <label>Horas de sol diarias promedio:</label>
+      <input type="number" id="sunHours" placeholder="Ej: 5" value="5">
+
+      <h3>Datos del Cultivo</h3>
+      <label>Tipo de cultivo:</label>
+      <select id="crop">
+        <option value="patata">Patata</option>
+        <option value="lechuga">Lechuga</option>
+        <option value="pimiento">Pimiento</option>
+        <option value="fresa">Fresa</option>
+      </select>
+
+      <label>Rendimiento base (kg/m²):</label>
+      <input type="number" id="yieldBase" placeholder="Ej: 2.5" value="2.5">
+
+      <h3>Datos del consumidor turístico</h3>
+      <label>Tipo de hotel:</label>
+      <select id="hotel">
+        <option value="hotel_1">5 estrellas</option>
+        <option value="hotel_2">4 estrellas</option>
+        <option value="hotel_3">Agroturismo</option>
+      </select>
+      <label>Precio venta energía (€/kWh):</label>
+      <input type="number" id="price" placeholder="Ej: 0.12" value="0.12">
+
+      
+    </div>
+
+    <!-- Columna Energía -->
+    <div style="flex: 1; min-width: 250px;">
+      <h3>Datos de Energía</h3>
+      <label>Num filas placas:</label>
+      <input type="number" id="nFilas" placeholder="Ej: 3" value="4">
+
+      <label>Separación entre filas (m):</label>
+      <input type="number" id="sepX" placeholder="Ej: 3" value="2">
+
+      <label>Num columnas placas:</label>
+      <input type="number" id="nCols" placeholder="Ej: 2" value="2">
+
+      <label>Separación entre columnas (m):</label>
+      <input type="number" id="sepY" placeholder="Ej: 3" value="2">
+
+      <label>Transparencia paneles (%):</label>
+      <input type="number" id="coverage" placeholder="Ej: 0.6" value="0.6">
+
+      <label>Eficiencia del sistema (%):</label>
+      <input type="number" id="efficiency" placeholder="Ej: 18" value="22">
+
+      <label>Dimensiones del panel: Alto, ancho (m):</label>
+      <input type="number" id="panelH" placeholder="Alto. Ej: 2.2" value="2.2">
+      <input type="number" id="panelW" placeholder="Ancho. Ej: 0.8" value="0.8">
+
+      <label>Elevación de los paneles (m):</label>
+      <input type="number" id="h_pv" placeholder="Ej: 4" value="4">
+
+      <label>Inclinación de los paneles - beta (º):</label>
+      <input type="number" id="inclinacion" placeholder="Ej: 4" value="30">
+
+      <label>Azimut (º):</label>
+      <input type="number" id="gamma" placeholder="Ej: 180º SUR" value="180">
+
+    </div>
+  </div>
+
+    <button onclick="calculate()">Calcular</button>
+    <button onclick="downloadPDF()" style="background:#007BFF;">Descargar PDF</button>
+
+    <div class="results" id="results" style="display:none;">
+      <p><strong>Potencia instalada estimada:</strong> <span id="power"></span> kWp</p>
+      <p><strong>Producción anual estimada:</strong> <span id="production"></span> kWh/año</p>
+      <p><strong>Ingresos anuales estimados:</strong> <span id="revenue"></span> €</p>
+      <p><strong>Producción estimada de ${cropName}:</strong> ${cropProduction.toFixed(0)} kg</p>
+      <canvas id="resultsChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+
+  <script>
+    let chart = null;
+
+    function calculate() {
+      const area = parseFloat(document.getElementById('area').value);
+      const coverage = parseFloat(document.getElementById('coverage').value) / 100;
+      const efficiency = parseFloat(document.getElementById('efficiency').value) / 100;
+      const sunHours = parseFloat(document.getElementById('sunHours').value);
+      const price = parseFloat(document.getElementById('price').value);
+
+      if (isNaN(area) || isNaN(coverage) || isNaN(efficiency) || isNaN(sunHours) || isNaN(price)) {
+        alert("Por favor, completa todos los campos con valores válidos.");
+        return;
+      }
+
+      const powerInstalled = area * coverage * efficiency;
+      const productionAnnual = powerInstalled * sunHours * 365;
+      const revenue = productionAnnual * price;
+
+      document.getElementById('power').textContent = powerInstalled.toFixed(2);
+      document.getElementById('production').textContent = productionAnnual.toFixed(0);
+      document.getElementById('revenue').textContent = revenue.toFixed(2);
+      document.getElementById('results').style.display = 'block';
+
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('resultsChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Potencia (kWp)', 'Producción (kWh)', 'Ingresos (€)'],
+          datasets: [{
+            label: 'Resultados',
+            data: [powerInstalled, productionAnnual, revenue],
+            backgroundColor: ['#66bb6a', '#29b6f6', '#ffa726']
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+
+    const yieldBase = parseFloat(document.getElementById('yieldBase').value);
+    const surfaceCultivable = area * (1 - coverage); // superficie no cubierta por paneles
+    const cropProduction = yieldBase * surfaceCultivable; // kg estimados
+
+    // Mostrar resultado
+    let cropName = crop.charAt(0).toUpperCase() + crop.slice(1);
+    document.getElementById('results').insertAdjacentHTML('beforeend', `
+      <p><strong>Producción estimada de ${cropName}:</strong> ${cropProduction.toFixed(0)} kg</p>
+    `);
+    }
+
+
+
+    function downloadPDF() {
+      const element = document.getElementById('calculator');
+      const opt = {
+        margin:       0.5,
+        filename:     'resultados_agrivoltaica.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+  </script>
+<footer style="margin-top: 40px; padding: 20px 0; background-color: #f9f9f9; text-align: center;">
+  <p style="margin-bottom: 10px;">Este proyecto ha sido cofinanciado gracias a:</p>
+  <img src="images/LogoFondos.png" alt="Logo Clúster TEIB" style="height: 70px;">
+</footer>
+</body>
+</html>

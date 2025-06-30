@@ -25,7 +25,7 @@
       margin: 10px 0 5px;
     }
     input {
-      width: 100%;
+      width: 50%;
       padding: 8px;
       margin-bottom: 15px;
       border-radius: 5px;
@@ -81,13 +81,18 @@
       <h3>Ubicación</h3>
       <label>Superficie disponible (m²):</label>
       <input type="number" id="area" placeholder="Ej: 1000" value="1000">
+      <label>Malla (10-250):</label>
+      <input type="number" id="resolucion_malla" placeholder="Ej: 100" value="100">
 
       <label>Coordenadas (latitud, longitud):</label>
-      <input type="number" id="latitud" placeholder="Ej: 1000" value="3">
-      <input type="number" id="longitud" placeholder="Ej: 1000" value="3">
+      <input type="number" id="latitud" placeholder="Ej: 1000" value="39.02">
+      <input type="number" id="longitud" placeholder="Ej: 1000" value="1.45">
 
-      <label>Horas de sol diarias promedio:</label>
-      <input type="number" id="sunHours" placeholder="Ej: 5" value="5">
+      <label>Albedo (0-1):</label>
+      <input type="number" id="albedo" placeholder="Ej: 0.3" value="0.3">
+
+      <label>Cte. Solar (W/m^2):</label>
+      <input type="number" id="G0" placeholder="Ej: 1367" value="1367">
 
       <h3>Datos del Cultivo</h3>
       <label>Tipo de cultivo:</label>
@@ -111,6 +116,19 @@
       <label>Precio venta energía (€/kWh):</label>
       <input type="number" id="price" placeholder="Ej: 0.12" value="0.12">
 
+      <h3>Datos de la simulación</h3>
+      <label>Modelo de clima:</label>
+      <select id="weather">
+        <option value="pvgis">PVGIS</option>
+        <option value="estandar">Estandar</option>
+      </select>
+      <label>Fecha inicio simulación:</label>
+      <input type="date" id="fecha_inicio" value="2025-06-01">
+
+      <label>Fecha fin simulación:</label>
+      <input type="date" id="fecha_fin" value="2025-07-01">
+      <label>Intervalo de días (num):</label>
+      <input type="number" id="day_interval" placeholder="Ej: 1" value="1">
       
     </div>
 
@@ -163,14 +181,20 @@
     </div>
   </div>
 
+<!-- f_ gap : Fracción de cielo visible bajo panel (entre 0 y 1) -->
+<!-- k_t : Índice de claridad medio (Liu & Jordan) -->
+<!-- fd : fracción difusa estimada -->
   <script>
     let chart = null;
 
     function calculate() {
+      const f_gap=0.2;
+      const k_t = 0.7;
+      const fd = 0.2;
       const area = parseFloat(document.getElementById('area').value);
       const coverage = parseFloat(document.getElementById('coverage').value) / 100;
       const efficiency = parseFloat(document.getElementById('efficiency').value) / 100;
-      const sunHours = parseFloat(document.getElementById('sunHours').value);
+      const sunHours = parseFloat(document.getElementById('day_interval').value);
       const price = parseFloat(document.getElementById('price').value);
 
       if (isNaN(area) || isNaN(coverage) || isNaN(efficiency) || isNaN(sunHours) || isNaN(price)) {

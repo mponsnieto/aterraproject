@@ -172,90 +172,24 @@
     <button onclick="calculate()">Calcular</button>
     <button onclick="downloadPDF()" style="background:#007BFF;">Descargar PDF</button>
 
+    <div class="results" id="inputSummary" style="margin-top: 20px; padding: 10px; background: #fff8e1; border-radius: 8px; display: none;">
+      <h3>Datos introducidos</h3>
+      <ul id="inputSummaryList"></ul>
+    </div>
+
     <div class="results" id="results" style="display:none;">
       <p><strong>Potencia instalada estimada:</strong> <span id="power"></span> kWp</p>
       <p><strong>Producción anual estimada:</strong> <span id="production"></span> kWh/año</p>
       <p><strong>Ingresos anuales estimados:</strong> <span id="revenue"></span> €</p>
-      <p><strong>Producción estimada de ${cropName}:</strong> ${cropProduction.toFixed(0)} kg</p>
+      <p><strong>Producción estimada de:</strong> <span id="cropProductionResult"></span></p>
       <canvas id="resultsChart" width="400" height="200"></canvas>
     </div>
   </div>
 
-<!-- f_ gap : Fracción de cielo visible bajo panel (entre 0 y 1) -->
-<!-- k_t : Índice de claridad medio (Liu & Jordan) -->
-<!-- fd : fracción difusa estimada -->
-  <script>
-    let chart = null;
-
-    function calculate() {
-      const f_gap=0.2;
-      const k_t = 0.7;
-      const fd = 0.2;
-      const area = parseFloat(document.getElementById('area').value);
-      const coverage = parseFloat(document.getElementById('coverage').value) / 100;
-      const efficiency = parseFloat(document.getElementById('efficiency').value) / 100;
-      const sunHours = parseFloat(document.getElementById('day_interval').value);
-      const price = parseFloat(document.getElementById('price').value);
-
-      if (isNaN(area) || isNaN(coverage) || isNaN(efficiency) || isNaN(sunHours) || isNaN(price)) {
-        alert("Por favor, completa todos los campos con valores válidos.");
-        return;
-      }
-
-      const powerInstalled = area * coverage * efficiency;
-      const productionAnnual = powerInstalled * sunHours * 365;
-      const revenue = productionAnnual * price;
-
-      document.getElementById('power').textContent = powerInstalled.toFixed(2);
-      document.getElementById('production').textContent = productionAnnual.toFixed(0);
-      document.getElementById('revenue').textContent = revenue.toFixed(2);
-      document.getElementById('results').style.display = 'block';
-
-      if (chart) chart.destroy();
-      const ctx = document.getElementById('resultsChart').getContext('2d');
-      chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Potencia (kWp)', 'Producción (kWh)', 'Ingresos (€)'],
-          datasets: [{
-            label: 'Resultados',
-            data: [powerInstalled, productionAnnual, revenue],
-            backgroundColor: ['#66bb6a', '#29b6f6', '#ffa726']
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
-
-    const yieldBase = parseFloat(document.getElementById('yieldBase').value);
-    const surfaceCultivable = area * (1 - coverage); // superficie no cubierta por paneles
-    const cropProduction = yieldBase * surfaceCultivable; // kg estimados
-
-    // Mostrar resultado
-    let cropName = crop.charAt(0).toUpperCase() + crop.slice(1);
-    document.getElementById('results').insertAdjacentHTML('beforeend', `
-      <p><strong>Producción estimada de ${cropName}:</strong> ${cropProduction.toFixed(0)} kg</p>
-    `);
-    }
+  <script src="calculate_v1.js"></script>
+  <script src="download.js"></script>
 
 
-
-    function downloadPDF() {
-      const element = document.getElementById('calculator');
-      const opt = {
-        margin:       0.5,
-        filename:     'resultados_agrivoltaica.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
-    }
-  </script>
 <footer style="margin-top: 40px; padding: 20px 0; background-color: #f9f9f9; text-align: center;">
   <p style="margin-bottom: 10px;">Este proyecto ha sido cofinanciado gracias a:</p>
   <img src="images/LogoFondos.png" alt="Logo Clúster TEIB" style="height: 70px;">

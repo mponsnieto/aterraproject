@@ -71,6 +71,24 @@ function calculate() {
   const productionAnnual = powerInstalled * sunHours * 365;
   const revenue = productionAnnual * price;
 
+  //const resultadoArreglos = simularArreglos({fecha_inicio,fecha_fin,day_interval,latitud,longitud,nFilas,nCols,sepX,sepY,margen,panelW,panelL,h_pv,inclinacion,orientacion,albedo,resolucion_malla,G0,tau_dir,f_gap,k_t,fd});
+
+  const datosVisual = {
+  latitud: parseFloat(document.getElementById("latitud").value),
+  fecha_inicio: new Date(document.getElementById("fecha_inicio").value),
+  nFilas: parseInt(document.getElementById("nFilas").value),
+  nCols: parseInt(document.getElementById("nCols").value),
+  sepX: parseFloat(document.getElementById("sepX").value),
+  sepY: parseFloat(document.getElementById("sepY").value),
+  panelW: parseFloat(document.getElementById("panelW").value),
+  panelL: parseFloat(document.getElementById("panelH").value), // ojo: H=longitud
+  h_pv: parseFloat(document.getElementById("h_pv").value),
+  inclinacion: parseFloat(document.getElementById("inclinacion").value),
+  orientacion: parseFloat(document.getElementById("gamma").value)
+  };
+
+  mostrarVisualizacion3D(datosVisual);
+
   document.getElementById('power').textContent = powerInstalled.toFixed(2);
   document.getElementById('production').textContent = productionAnnual.toFixed(0);
   document.getElementById('revenue').textContent = revenue.toFixed(2);

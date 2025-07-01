@@ -161,7 +161,7 @@
       <input type="number" id="h_pv" placeholder="Ej: 4" value="4">
 
       <label>Inclinación de los paneles - beta (º):</label>
-      <input type="number" id="inclinacion" placeholder="Ej: 4" value="30">
+      <input type="number" id="inclinacion" placeholder="Ej: 4" value="35">
 
       <label>Azimut (º):</label>
       <input type="number" id="gamma" placeholder="Ej: 180º SUR" value="180">
@@ -177,6 +177,9 @@
       <ul id="inputSummaryList"></ul>
     </div>
 
+    <div id="visualizacion3D" style="width: 100%; height: 600px; margin-top: 30px;"></div>
+
+
     <div class="results" id="results" style="display:none;">
       <p><strong>Potencia instalada estimada:</strong> <span id="power"></span> kWp</p>
       <p><strong>Producción anual estimada:</strong> <span id="production"></span> kWh/año</p>
@@ -186,7 +189,21 @@
     </div>
   </div>
 
-  <script src="calculate_v1.js"></script>
+  <!-- Three.js clásico -->
+  <script src="https://unpkg.com/three@0.124.0/build/three.min.js"></script>
+
+  <!-- TrackballControls compatible con esa versión -->
+  <script src="https://unpkg.com/three@0.124.0/examples/js/controls/TrackballControls.js"></script>
+
+
+
+
+
+
+  <!-- Tu visualizador -->
+  <script src="visual3d.js"></script>
+
+  <script src="tests/calculate_v1.js"></script>
   <script src="download.js"></script>
 
 

@@ -75,7 +75,9 @@ function calculate() {
 
   const datosVisual = {
   latitud: parseFloat(document.getElementById("latitud").value),
+  longitud: parseFloat(document.getElementById("longitud").value),
   fecha_inicio: new Date(document.getElementById("fecha_inicio").value),
+  fecha_fin: new Date(document.getElementById("fecha_fin").value),
   nFilas: parseInt(document.getElementById("nFilas").value),
   nCols: parseInt(document.getElementById("nCols").value),
   sepX: parseFloat(document.getElementById("sepX").value),
@@ -84,10 +86,27 @@ function calculate() {
   panelL: parseFloat(document.getElementById("panelH").value), // ojo: H=longitud
   h_pv: parseFloat(document.getElementById("h_pv").value),
   inclinacion: parseFloat(document.getElementById("inclinacion").value),
+  G0: parseFloat(document.getElementById("G0").value),
+  day_interval: parseFloat(document.getElementById("day_interval").value),
+  albedo: parseFloat(document.getElementById("albedo").value),
+  margen,
+  tau_dir,
+  sunHours,
+  f_gap,
+  k_t,
+  fd,
+  malla,
   orientacion: parseFloat(document.getElementById("gamma").value)
   };
 
-  mostrarVisualizacion3D(datosVisual);
+  const paneles = mostrarVisualizacion3D(datosVisual);
+  console.log("Paneles generados:", paneles);
+
+  if (weather === "teorico") {
+    resultados = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacion.js
+  } else if (modeloClima === "pvgis") {
+    resultados = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacionConDatosReales.js
+  }
 
   document.getElementById('power').textContent = powerInstalled.toFixed(2);
   document.getElementById('production').textContent = productionAnnual.toFixed(0);
@@ -122,3 +141,4 @@ const cropProduction = yieldBase * surfaceCultivable; // kg estimados
 let cropName = crop.charAt(0).toUpperCase() + crop.slice(1);
 document.getElementById('cropProductionResult').textContent = `${cropProduction.toFixed(0)} kg (${cropName})`;
 }
+

@@ -119,8 +119,8 @@
       <h3>Datos de la simulación</h3>
       <label>Modelo de clima:</label>
       <select id="weather">
+        <option value="teorico">Teorico</option>
         <option value="pvgis">PVGIS</option>
-        <option value="estandar">Estandar</option>
       </select>
       <label>Fecha inicio simulación:</label>
       <input type="date" id="fecha_inicio" value="2025-06-01">
@@ -128,7 +128,7 @@
       <label>Fecha fin simulación:</label>
       <input type="date" id="fecha_fin" value="2025-07-01">
       <label>Intervalo de días (num):</label>
-      <input type="number" id="day_interval" placeholder="Ej: 1" value="1">
+      <input type="number" id="day_interval" placeholder="Ej: 10" value="10">
       
     </div>
 
@@ -179,6 +179,9 @@
 
     <div id="visualizacion3D" style="width: 100%; height: 600px; margin-top: 30px;"></div>
 
+    
+    <div id="visualRadiacion" style="margin-top:20px;margin: 0px auto; background: #fff8e1"></div>
+    <div id="visualRadiacion" style="margin-top:20px;"></div>
 
     <div class="results" id="results" style="display:none;">
       <p><strong>Potencia instalada estimada:</strong> <span id="power"></span> kWp</p>
@@ -202,7 +205,8 @@
 
   <!-- Tu visualizador -->
   <script src="visual3d.js"></script>
-
+  <script src="runSimulacionRadiacion.js"></script>
+  <script src="runSimulacionRadiacionConDatosReales.js"></script>
   <script src="tests/calculate_v1.js"></script>
   <script src="download.js"></script>
 

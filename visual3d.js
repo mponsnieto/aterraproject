@@ -70,6 +70,7 @@ camera.lookAt(new THREE.Vector3(0, 5, 0));  // mirar hacia el centro de los pane
     renderer.render(scene, camera);
   }
   animate();
+  return paneles;
 }
 
 function crearPanel(TL, TR, PL, PR, color = 0x0055ff) {
@@ -143,10 +144,6 @@ function simularArreglo(datos) {
       paneles.push({ TL, TR, PL: BL, PR: BR });
     }
   }
-
-  
-
-
   return paneles;
 }
 

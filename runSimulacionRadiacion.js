@@ -167,13 +167,14 @@ function runSimulacionRadiacion(datos, paneles){
   const dias_por_intervalo = dias_calculados.map((_, i) =>
     i < dias_calculados.length - 1 ? day_interval : getDayOfYear(end) - getDayOfYear(dias_calculados[i]) + 1);
 
-  console.log("E panel dia:", E_por_panel_dias);
+  //console.log("E panel dia:", E_por_panel_dias);
   const E_por_panel_total = sumPaneles(E_por_panel_dias, dias_por_intervalo);
   const E_paneles_total = E_por_panel_total.reduce((a, b) => a + b, 0);
   const E_terreno_total = accumulateTerreno(E_terreno_dias, dias_por_intervalo);
-  console.log("paneles:", paneles);
-  console.log("dias_por_intervalo",dias_por_intervalo,"E_terreno_total", E_terreno_total)
-  mostrarMapaEnergiav2(xgv, ygv, E_terreno_total, paneles)
+  //console.log("paneles:", paneles);
+  console.log("dias_por_intervalo",dias_por_intervalo,"E_por_panel_dias", E_por_panel_dias,"E_por_panel_total", E_por_panel_total)
+  mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles)
+  mostrarGraficoPaneles(E_por_panel_total)
 
   // === 6. Empaquetar resultados ===
   return {
@@ -372,110 +373,84 @@ function meshgrid(x,y){
   return { XX, YY };
 }
 
-function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
-var i = 0, 
-  isPlaying = false; 
-const ctx = document.getElementById('resultsChart').getContext('2d');
-chart = new Chart(ctx, {
-  type: 'chartDiv',
-    data: { 
-    type: 'heatmap solid', 
-    margin_right: 15, 
-    title_label_text: 'Heatmap Data', 
-    animation_duration: 0, 
-    defaultSeries: { 
-      // Padding between cells 
-      shape_innerPadding: -0.02, 
-      // Improves performance. 
-      mouseTracking_enabled: false
-    }, 
-    defaultPoint: { 
-      outline_color: 'none', 
-      outline_width: 0 
-    }, 
-    xAxis_label_text: 'Longitude', 
-    yAxis_label_text: 'Latitude', 
-    zAxis_label_text: 'Heat Delta', 
-    palette: { 
-      /*Using a function instead of token like '%zValue' improves performance.*/
-      pointValue: function(p) { 
-        return p.options('z'); 
-      }, 
-      colors: [ 
-        '#ffffcc', 
-        '#ffeda0', 
-        '#fed976', 
-        '#feb24c', 
-        '#fd8d3c', 
-        '#fc4e2a', 
-        '#e31a1c', 
-        '#bd0026', 
-        '#b00026'
-      ] 
-    }, 
-    series: [{ E_terreno_total }], 
-    toolbar_items: { 
-      Stop: { 
-        type: 'option', 
-        icon_name: 'system/default/pause', 
-        margin: 10, 
-        boxVisible: true, 
-        label_text: 'Pause', 
-        events: { 
-          change: function() { 
-            playPause(this.chart); 
-          } 
-        }, 
-        states_select: { 
-          icon_name: 'system/default/play', 
-          label_text: 'Play'
-        } 
-      } 
-    } 
-  }, 
-
-  }) 
+function mostrarGraficoPaneles(E_por_panel_total) {
+  const ctx = document.getElementById("graficoPorPanel").getContext("2d");
+  
+  const labels = E_por_panel_total.map((_, i) => `Panel ${i + 1}`);
+  console.log("E_por_panel",E_por_panel_total);
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Energía total por panel (kWh)',
+        data: E_por_panel_total,
+        backgroundColor: 'rgba(30, 144, 255, 0.6)',
+        borderColor: 'rgba(30, 144, 255, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Energía total por panel'
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Panel' }
+        },
+        y: {
+          title: { display: true, text: 'Energía (kWh)' },
+          beginAtZero: true
+        }
+      }
+    }
+  });
 }
-function mostrarMapaEnergiav2(xgv, ygv, E_terreno_total, paneles){
-  const canvas = document.createElement("canvas");
-  const titulo = document.createElement("h3");
-  titulo.textContent = "Energía acumulada en el terreno (kWh/m²)";
-  titulo.style.textAlign = "center"; 
-  titulo.style.marginBottom = "10px";
+
+function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
+const canvas = document.createElement("canvas");
     
-  const scale = 2; // Escala para aumentar resolución
-  canvas.width = xgv.length * scale;
-  canvas.height = ygv.length * scale;
+  const padding = 100; // espacio para etiquetas
+  const scale = 4;
+  const width = xgv.length * scale + padding;
+  const height = ygv.length * scale + padding;
+  const width_legend = 30;
+
+  canvas.width = width+(width_legend*2);
+  canvas.height = height;
 
   const ctx = canvas.getContext("2d");
-
   const nRows = ygv.length;
   const nCols = xgv.length;
-
-  // Colores para el mapa (simple interpolación entre azul y amarillo)
-  const getColor = (v, min, max) => {
-    const ratio = (v - min) / (max - min);
-    const r = Math.floor(255 * ratio);
-    const g = Math.floor(255 * ratio);
-    const b = Math.floor(255 * (1 - ratio));
-    return `rgb(${r},${g},${b})`;
-  };
 
   const minVal = Math.min(...E_terreno_total.flat());
   const maxVal = Math.max(...E_terreno_total.flat());
 
-  // Dibujar celdas de energía
+  const getColor = (v) => {
+    const ratio = (v - minVal) / (maxVal - minVal);
+    const r = Math.floor(255 * ratio);
+    const g = Math.floor(255 * ratio);
+    const b = Math.floor(255 * (1 - ratio)); //Valor más bajo
+    return `rgb(${r},${g},${b})`;
+  };
+
+
+  // Dibujar heatmap
   for (let i = 0; i < nCols; i++) {
     for (let j = 0; j < nRows; j++) {
-      const val = E_terreno_total[j][i]; // [fila][columna]
-      ctx.fillStyle = getColor(val, minVal, maxVal);
-      ctx.fillRect(i * scale, (nRows - j - 1) * scale, scale, scale); // invertir eje Y
+      const val = E_terreno_total[j][i];
+      ctx.fillStyle = getColor(val);
+      ctx.fillRect(padding + i * scale, j * scale, scale, scale);
     }
   }
 
-  // Dibujar paneles como rectángulos translúcidos
-  ctx.strokeStyle = "withe";
-  ctx.fillStyle = "rgba(200,200,255,0.6)";
+  // Dibujar paneles
+  ctx.fillStyle = "rgba(180,180,255,0.6)";
+  ctx.strokeStyle = "black";
   for (const p of paneles) {
     const xs = [p.PL[0], p.PR[0], p.TL[0], p.TR[0]];
     const ys = [p.PL[1], p.PR[1], p.TL[1], p.TR[1]];
@@ -485,60 +460,88 @@ function mostrarMapaEnergiav2(xgv, ygv, E_terreno_total, paneles){
     const yMin = Math.min(...ys);
     const yMax = Math.max(...ys);
 
-    const x = xgv.findIndex(val => val >= xMin);
+    const xIdx = xgv.findIndex(val => val >= xMin);
+    const yIdx = ygv.findIndex(val => val >= yMin);
     const w = Math.round((xMax - xMin) / (xgv[1] - xgv[0]));
-    const y = ygv.findIndex(val => val >= yMin);
     const h = Math.round((yMax - yMin) / (ygv[1] - ygv[0]));
 
-    const px = x * scale;
-    const py = (nRows - y - h) * scale;
-
-    ctx.fillRect(px, py, w * scale, h * scale);
-    ctx.strokeRect(px, py, w * scale, h * scale);
+    ctx.fillRect(padding + xIdx * scale, yIdx * scale, w * scale, h * scale);
+    ctx.strokeRect(padding + xIdx * scale, yIdx * scale, w * scale, h * scale);
   }
 
-  const legend = document.createElement("canvas");
-  legend.width = 300;
-  legend.height = 40;
-  const lctx = legend.getContext("2d");
+  // Etiquetas del eje Y
+  ctx.fillStyle = "black";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  for (let j = nRows-1; j > 0; j -= 5) {
+    ctx.fillText(ygv[j].toFixed(1), padding - 5, j * scale + scale / 2);
+  }
 
-  const gradient = lctx.createLinearGradient(0, 0, legend.width, 0);
-  gradient.addColorStop(0, "rgb(0,0,255)");   // azul
-  gradient.addColorStop(0.5, "rgb(255,255,0)"); // amarillo
-  gradient.addColorStop(1, "rgb(255,0,0)");   // rojo
+  // Etiquetas del eje X
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  for (let i = 0; i < nCols; i += 5) {
+    ctx.fillText(xgv[i].toFixed(1), padding + i * scale + scale / 2, height - padding + 5);
+  }
 
-  lctx.fillStyle = gradient;
-  lctx.fillRect(0, 0, legend.width, 20);
+  // Ejes
+  ctx.beginPath();
+  ctx.moveTo(padding, 0);
+  ctx.lineTo(padding, nRows * scale);
+  ctx.moveTo(padding, nRows * scale);
+  ctx.lineTo(width, nRows * scale);
+  ctx.stroke();
 
-  // Etiquetas
-  lctx.fillStyle = "black";
-  lctx.font = "12px Arial";
-  lctx.fillText(minVal.toFixed(1), 0, 35);
-  lctx.fillText(((minVal + maxVal) / 2).toFixed(1), legend.width / 2 - 10, 35);
-  lctx.fillText(maxVal.toFixed(1), legend.width - 30, 35);
+  // Leyenda vertical
+  const legendHeight = height - padding + 5;
+  const legendX = width + width_legend;
+  const legendY = 0;//(height - legendHeight) / 2;
+  const gradient = ctx.createLinearGradient(0, legendY, 0, legendY + legendHeight);
+  gradient.addColorStop(0, getColor(maxVal));
+  gradient.addColorStop(1, getColor(minVal));
 
-  // Añadir al contenedor
+  ctx.fillStyle = gradient;
+  ctx.fillRect(legendX, legendY, 20, legendHeight);
+
+  ctx.strokeStyle = "black";
+  ctx.strokeRect(legendX, legendY, 20, legendHeight);
+
+  ctx.fillStyle = "black";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText(maxVal.toFixed(1), legendX + 25, legendY);
+  ctx.fillText(minVal.toFixed(1), legendX + 25, legendY + legendHeight);
+
+  // Añadir a la página
   const container = document.getElementById("visualRadiacion");
-  container.innerHTML = ""; // limpiar anterior
+  container.innerHTML = "";
+
+  const titulo = document.createElement("h3");
+  titulo.textContent = "Energía acumulada en el terreno (kWh/m²)";
+  titulo.style.textAlign = "center";
+  titulo.style.marginBottom = "10px";
   container.appendChild(titulo);
+
   container.appendChild(canvas);
-  container.appendChild(legend);
 }
 
 
 function sumPaneles(E_por_panel_dias, dias_por_intervalo) {
   const n = E_por_panel_dias[0].length;
   const total = new Array(n).fill(0);
-
+  console.log("n",n,"total", total,"E_por_panel_dias.length", E_por_panel_dias.length)
   for (let i = 0; i < E_por_panel_dias.length; i++) {
     const pesos = dias_por_intervalo[i];
     const energiaDia = E_por_panel_dias[i];
 
     for (let j = 0; j < n; j++) {
-      total[j] += energiaDia[j] * pesos;
+      if (isFinite(energiaDia[j])&&isFinite(pesos)){
+        total[j] += energiaDia[j] * pesos;
+        console.log("energiaDia[j]", energiaDia[j],"total", total);
+      }
     }
   }
-
+  console.log("total", total);
   return total;
 }
 

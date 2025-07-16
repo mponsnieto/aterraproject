@@ -103,10 +103,12 @@ function calculate() {
   console.log("Paneles generados:", paneles);
 
   if (weather === "teorico") {
-    resultados = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacion.js
+    const energia = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacion.js
   } else if (modeloClima === "pvgis") {
-    resultados = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacionConDatosReales.js
+    const energia = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacionConDatosReales.js
   }
+
+  const resultados = calculate_SRS(datosVisual, energia, paneles);
 
   document.getElementById('power').textContent = powerInstalled.toFixed(2);
   document.getElementById('production').textContent = productionAnnual.toFixed(0);

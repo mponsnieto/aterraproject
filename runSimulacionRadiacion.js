@@ -6,7 +6,7 @@ function runSimulacionRadiacion(datos, paneles){
  // === Parámetros de entrada ===
 	const {
     fecha_inicio, fecha_fin,latitud, longitud, nFilas, nCols, margen, day_interval,
-    inclinacion, orientacion: gamma, albedo, malla, G0, tau_dir, f_gap,k_t, fd
+    inclinacion, orientacion: gamma, albedo, malla, G0, tau_dir, f_gap,k_t, fd, sepY, sepX
   	} = datos;
 	
 	beta=90-inclinacion;
@@ -414,9 +414,9 @@ function mostrarGraficoPaneles(E_por_panel_total) {
 function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
 const canvas = document.createElement("canvas");
     
-  const padding = 100; // espacio para etiquetas
+  const padding = 50; // espacio para etiquetas
   const scale = 4;
-  const width = xgv.length * scale + padding;
+  const width = xgv.length * scale + padding*2;
   const height = ygv.length * scale + padding;
   const width_legend = 30;
 
@@ -427,8 +427,8 @@ const canvas = document.createElement("canvas");
   const nRows = ygv.length;
   const nCols = xgv.length;
 
-  const minVal = Math.min(...E_terreno_total.flat());
-  const maxVal = Math.max(...E_terreno_total.flat());
+  const minVal = Math.ceil(Math.min(...E_terreno_total.flat()));
+  const maxVal = Math.ceil(Math.max(...E_terreno_total.flat()));
 
   const getColor = (v) => {
     const ratio = (v - minVal) / (maxVal - minVal);
@@ -444,7 +444,8 @@ const canvas = document.createElement("canvas");
     for (let j = 0; j < nRows; j++) {
       const val = E_terreno_total[j][i];
       ctx.fillStyle = getColor(val);
-      ctx.fillRect(padding + i * scale, j * scale, scale, scale);
+      const y = (nRows - j - 1) * scale;
+      ctx.fillRect(padding + i * scale, y, scale, scale);
     }
   }
 
@@ -465,22 +466,35 @@ const canvas = document.createElement("canvas");
     const w = Math.round((xMax - xMin) / (xgv[1] - xgv[0]));
     const h = Math.round((yMax - yMin) / (ygv[1] - ygv[0]));
 
-    ctx.fillRect(padding + xIdx * scale, yIdx * scale, w * scale, h * scale);
-    ctx.strokeRect(padding + xIdx * scale, yIdx * scale, w * scale, h * scale);
+    ctx.fillRect(padding + xIdx * scale, (nRows - yIdx - h) * scale, w * scale, h * scale);
+    ctx.strokeRect(padding + xIdx * scale, (nRows - yIdx - h) * scale, w * scale, h * scale);
   }
 
   // Etiquetas del eje Y
+  ctx.save();
+  ctx.fillStyle = "black";
+  ctx.translate(15, (ygv.length * scale) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.fillText("Y (m)", 0, 0);
+  ctx.restore();
+
   ctx.fillStyle = "black";
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
   for (let j = nRows-1; j > 0; j -= 5) {
-    ctx.fillText(ygv[j].toFixed(1), padding - 5, j * scale + scale / 2);
+    const y = (nRows - j) * scale + scale / 2;
+    ctx.fillText(ygv[j].toFixed(1), padding-5 , y);
   }
 
   // Etiquetas del eje X
   ctx.textAlign = "center";
+  ctx.fillStyle = "black";
+
+  ctx.fillText("X (m)", padding + (xgv.length * scale) / 2, height - 10);
+  ctx.textAlign = "center";
   ctx.textBaseline = "top";
-  for (let i = 0; i < nCols; i += 5) {
+  for (let i = nCols-1; i>0; i-=5){//0; i < nCols; i += 5) {
     ctx.fillText(xgv[i].toFixed(1), padding + i * scale + scale / 2, height - padding + 5);
   }
 
@@ -493,10 +507,10 @@ const canvas = document.createElement("canvas");
   ctx.stroke();
 
   // Leyenda vertical
-  const legendHeight = height - padding + 5;
-  const legendX = width + width_legend;
-  const legendY = 0;//(height - legendHeight) / 2;
-  const gradient = ctx.createLinearGradient(0, legendY, 0, legendY + legendHeight);
+  const legendHeight = height - padding-15;
+  const legendX = width - width_legend;
+  const legendY = 5;//Primer punto de la leyenda
+  const gradient = ctx.createLinearGradient(0, legendY, 0, legendHeight);
   gradient.addColorStop(0, getColor(maxVal));
   gradient.addColorStop(1, getColor(minVal));
 
@@ -504,13 +518,20 @@ const canvas = document.createElement("canvas");
   ctx.fillRect(legendX, legendY, 20, legendHeight);
 
   ctx.strokeStyle = "black";
-  ctx.strokeRect(legendX, legendY, 20, legendHeight);
+  ctx.strokeRect(legendX, legendY,20, legendHeight);
 
   ctx.fillStyle = "black";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(maxVal.toFixed(1), legendX + 25, legendY);
-  ctx.fillText(minVal.toFixed(1), legendX + 25, legendY + legendHeight);
+  
+  const nTicks = 5; // Número total de marcas (incluye min y max)
+  for (let i = 0; i < nTicks; i++) {
+    const t = i / (nTicks - 1);
+    const y = legendY + t * legendHeight;
+    const val = maxVal - t * (maxVal - minVal);
+
+    ctx.fillText(val.toFixed(1), legendX + width_legend, y);
+  }
 
   // Añadir a la página
   const container = document.getElementById("visualRadiacion");

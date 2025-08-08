@@ -89,6 +89,7 @@ function calculate() {
   G0: parseFloat(document.getElementById("G0").value),
   day_interval: parseFloat(document.getElementById("day_interval").value),
   albedo: parseFloat(document.getElementById("albedo").value),
+  cultivo: (document.getElementById("crop").value),
   margen,
   tau_dir,
   sunHours,
@@ -102,10 +103,11 @@ function calculate() {
   const paneles = mostrarVisualizacion3D(datosVisual);
   console.log("Paneles generados:", paneles);
 
+  let energia;
   if (weather === "teorico") {
-    const energia = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacion.js
-  } else if (modeloClima === "pvgis") {
-    const energia = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacionConDatosReales.js
+    energia = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacion.js
+  } else if (weather === "pvgis") {
+    energia = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacionConDatosReales.js
   }
 
   const resultados = calculate_SRS(datosVisual, energia, paneles);

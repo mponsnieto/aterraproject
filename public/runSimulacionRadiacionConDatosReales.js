@@ -82,6 +82,14 @@ for (let dia = new Date(fecha_inicio); dia <= new Date(fecha_fin); dia.setDate(d
       // — Buscar el registro PVGIS más cercano en hora decimal —
       const horaDec = time.getUTCHours() + time.getUTCMinutes() / 60;
       let reg = datosDia[0], bestDiff = Infinity;
+
+
+
+      // Recorre directamente las muestras PVGIS:
+      for (const reg of datosDia) {
+        const DNI = reg.DNI, DHI = reg.DHI, GHI = reg.GHI;
+        if (DNI < 1 && DHI < 1 && GHI < 1) continue; // noche
+      }
       for (const r of datosDia) {
         const d = Math.abs(r.Hora - horaDec);
         if (d < bestDiff) { bestDiff = d; reg = r; }
@@ -185,7 +193,7 @@ for (let dia = new Date(fecha_inicio); dia <= new Date(fecha_fin); dia.setDate(d
 
   mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles)
   mostrarGraficoPaneles(E_por_panel_total)
-  
+
   return {
     E_paneles_dias,
     E_por_panel_dias,

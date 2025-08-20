@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulador Proyectos Agrivoltaica - Proyecto ATERRA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f0f4f8;
+    }
+    h1 {
+      text-align: center;
+    }
+    .calculator {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input {
+      width: 50%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #2e8b57;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e8f5e9;
+      border-radius: 8px;
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <h1>Simulador Proyectos Agrivoltaica - Proyecto ATERRA</h1>
+  <div style="display: flex; justify-content: center; gap: 20px; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: center; gap: 40px; align-items: center;">
+    <a href="https://clusterteib.com" target="_blank" rel="noopener">
+      <img src="images/LogoCluster.png" alt="Logo Clúster TEIB" style="height: 50px;">
+    </a>
+    <a href="https://www.uib.cat" target="_blank" rel="noopener">
+      <img src="images/LogoUIB.png" alt="Logo UIB" style="height: 50px;">
+    </a>
+    </div>
+
+  </div>
+  <div class="calculator" id="calculator">
+  <div class="form-sections" style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <!-- Columna Ubicación y cultivo -->
+    <div style="flex: 1; min-width: 250px;">
+      <h3>Ubicación</h3>
+      <label>Superficie disponible (m²):</label>
+      <input type="number" id="area" placeholder="Ej: 1000" value="1000">
+      <label>Malla (10-250):</label>
+      <input type="number" id="resolucion_malla" placeholder="Ej: 100" value="50">
+
+      <label>Coordenadas (latitud, longitud):</label>
+      <input type="number" id="latitud" placeholder="Ej: 1000" value="39.02">
+      <input type="number" id="longitud" placeholder="Ej: 1000" value="1.45">
+
+      <label>Albedo (0-1):</label>
+      <input type="number" id="albedo" placeholder="Ej: 0.3" value="0.3">
+
+      <label>Cte. Solar (W/m^2):</label>
+      <input type="number" id="G0" placeholder="Ej: 1367" value="1367">
+
+      <h3>Datos del Cultivo</h3>
+      <label>Tipo de cultivo:</label>
+      <select id="crop">
+        <option value="lechuga">Lechuga</option>
+        <option value="patata">Patata</option>        
+        <option value="pimiento">Pimiento</option>
+        <option value="fresa">Fresa</option>
+      </select>
+
+      <label>Rendimiento base (kg/ha):</label>
+      <input type="number" id="yieldBase" placeholder="Ej: 2.5" value="2.5">
+
+      <h3>Datos del consumidor turístico</h3>
+      <label>Tipo de hotel:</label>
+      <select id="hotel">
+        <option value="hotel_1">5 estrellas</option>
+        <option value="hotel_2">4 estrellas</option>
+        <option value="hotel_3">Agroturismo</option>
+      </select>
+      <label>Precio venta energía (€/kWh):</label>
+      <input type="number" id="price" placeholder="Ej: 0.12" value="0.12">
+
+      <h3>Datos de la simulación</h3>
+      <label>Modelo de clima:</label>
+      <select id="weather">
+        <option value="teorico">Teorico</option>  
+        <option value="pvgis">PVGIS</option>
+      </select>
+      <label>Fecha inicio simulación:</label>
+      <input type="date" id="fecha_inicio" value="2025-06-01">
+
+      <label>Fecha fin simulación:</label>
+      <input type="date" id="fecha_fin" value="2025-07-01">
+      <label>Intervalo de días (num):</label>
+      <input type="number" id="day_interval" placeholder="Ej: 10" value="10">
+      
+    </div>
+
+    <!-- Columna Energía -->
+    <div style="flex: 1; min-width: 250px;">
+      <h3>Datos de Energía</h3>
+      <label>Num filas placas:</label>
+      <input type="number" id="nFilas" placeholder="Ej: 3" value="4">
+
+      <label>Separación entre filas (m):</label>
+      <input type="number" id="sepY" placeholder="Ej: 3" value="1">
+
+      <label>Num columnas placas:</label>
+      <input type="number" id="nCols" placeholder="Ej: 2" value="2">
+
+      <label>Separación entre columnas (m):</label>
+      <input type="number" id="sepX" placeholder="Ej: 3" value="0.1">
+
+      <label>Transparencia paneles (%):</label>
+      <input type="number" id="coverage" placeholder="Ej: 0.6" value="0.6">
+
+      <label>Eficiencia del sistema (%):</label>
+      <input type="number" id="efficiency" placeholder="Ej: 18" value="22">
+
+      <label>Dimensiones del panel: Alto, ancho (m):</label>
+      <input type="number" id="panelH" placeholder="Alto. Ej: 2.2" value="2.2">
+      <input type="number" id="panelW" placeholder="Ancho. Ej: 0.8" value="0.8">
+
+      <label>Elevación de los paneles (m):</label>
+      <input type="number" id="h_pv" placeholder="Ej: 4" value="4">
+
+      <label>Inclinación de los paneles - beta (º):</label>
+      <input type="number" id="inclinacion" placeholder="Ej: 4" value="35">
+
+      <label>Azimut (º):</label>
+      <input type="number" id="gamma" placeholder="Ej: 180º SUR" value="180">
+
+    </div>
+  </div>
+
+    <button onclick="calculate()">Calcular</button>
+    <button onclick="downloadPDF()" style="background:#007BFF;">Descargar PDF</button>
+
+    <div class="results" id="inputSummary" style="margin-top: 20px; padding: 10px; background: #fff8e1; border-radius: 8px; display: none;">
+      <h3>Datos introducidos</h3>
+      <ul id="inputSummaryList"></ul>
+    </div>
+
+    <div id="visualizacion3D" style="width: 100%; height: 600px; margin-top: 30px;"></div>
+
+    
+    <div id="visualRadiacion" style="margin-top:20px;margin: 0px auto; background: #fff8e1"></div>
+    <canvas id="graficoPorPanel" width="600" height="300" style="margin-top: 30px;"></canvas>
+
+    <div id="results_RSR"> </div>
+    <canvas id="graficoRSR" width="600" height="300" style="margin-top: 30px;"></canvas>
+
+    <div class="results" id="results" style="display:none;">
+      <p><strong>Potencia instalada estimada:</strong> <span id="power"></span> kWp</p>
+      <p><strong>Producción anual estimada:</strong> <span id="production"></span> kWh/año</p>
+      <p><strong>Ingresos anuales estimados:</strong> <span id="revenue"></span> €</p>
+      <p><strong>Producción estimada de:</strong> <span id="cropProductionResult"></span></p>
+      <canvas id="resultsChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Three.js clásico -->
+  <script src="https://unpkg.com/three@0.124.0/build/three.min.js"></script>
+
+  <!-- TrackballControls compatible con esa versión -->
+  <script src="https://unpkg.com/three@0.124.0/examples/js/controls/TrackballControls.js"></script>
+
+
+
+
+
+
+  <!-- Tu visualizador -->
+  <script src="visual3d.js"></script>
+  <script src="runSimulacionRadiacion.js"></script>
+  <script src="runSimulacionRadiacionConDatosReales.js"></script>
+  <script src="tests/calculate_v1.js"></script>
+  <script src="parameters/clasificacion_cultivos.js"></script>
+  <script src="parameters/Ecuaciones_CrecimVeg.js"></script>
+  <script src="tests/calculate_SRS.js"></script>
+  <script src="download.js"></script>
+
+
+<footer style="margin-top: 40px; padding: 20px 0; background-color: #f9f9f9; text-align: center;">
+  <p style="margin-bottom: 10px;">Este proyecto ha sido cofinanciado gracias a:</p>
+  <img src="images/LogoFondos.png" alt="Logo Clúster TEIB" style="height: 70px;">
+</footer>
+</body>
+</html>

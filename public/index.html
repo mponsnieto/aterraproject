@@ -82,7 +82,7 @@
       <label>Superficie disponible (m²):</label>
       <input type="number" id="area" placeholder="Ej: 1000" value="1000">
       <label>Malla (10-250):</label>
-      <input type="number" id="resolucion_malla" placeholder="Ej: 100" value="100">
+      <input type="number" id="resolucion_malla" placeholder="Ej: 100" value="50">
 
       <label>Coordenadas (latitud, longitud):</label>
       <input type="number" id="latitud" placeholder="Ej: 1000" value="39.02">
@@ -97,8 +97,8 @@
       <h3>Datos del Cultivo</h3>
       <label>Tipo de cultivo:</label>
       <select id="crop">
-        <option value="patata">Patata</option>
         <option value="lechuga">Lechuga</option>
+        <option value="patata">Patata</option>        
         <option value="pimiento">Pimiento</option>
         <option value="fresa">Fresa</option>
       </select>
@@ -119,8 +119,8 @@
       <h3>Datos de la simulación</h3>
       <label>Modelo de clima:</label>
       <select id="weather">
-        <option value="teorico">Teorico</option>
         <option value="pvgis">PVGIS</option>
+        <option value="teorico">Teorico</option>        
       </select>
       <label>Fecha inicio simulación:</label>
       <input type="date" id="fecha_inicio" value="2025-06-01">
@@ -182,6 +182,9 @@
     
     <div id="visualRadiacion" style="margin-top:20px;margin: 0px auto; background: #fff8e1"></div>
     <canvas id="graficoPorPanel" width="600" height="300" style="margin-top: 30px;"></canvas>
+
+    <div id="results_RSR"> </div>
+    <canvas id="graficoRSR" width="600" height="300" style="margin-top: 30px;"></canvas>
 
     <div class="results" id="results" style="display:none;">
       <p><strong>Potencia instalada estimada:</strong> <span id="power"></span> kWp</p>

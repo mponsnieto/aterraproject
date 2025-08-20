@@ -1,6 +1,25 @@
-# Calculadora Agrivoltaica
+# Simulador ATERRA – Simulador de Proyectos Agrivoltaicos
 
-Esta herramienta permite calcular el potencial de un proyecto de agrivoltaica a partir de parámetros básicos como superficie, eficiencia del sistema y radiación solar.
+Este proyecto desarrolla un simulador web interactivo para evaluar proyectos agrivoltaicos  para el sector turístico de las Islas Baleares en el marco del proyecto ATERRA.
+El simulador combina cálculos energéticos, agrícolas y económicos, integrando datos climáticos teóricos o reales (desde PVGIS) para estimar:
+
+- Producción eléctrica (energía solar captada por los paneles FV).
+- Impacto sobre cultivos (sombra, rendimiento, tolerancia según especie).
+- Indicadores económicos (ingresos por energía, producción agrícola).
+- Visualizaciones 2D y 3D de radiación y disposición de paneles.
+
+
+## ⚙️ Requisitos
+
+Frontend: Navegador moderno (Chrome, Firefox, Edge).
+
+No necesita instalación: basta con abrir index.html.
+
+Backend (para datos reales PVGIS):
+
+Node.js  >= 16
+
+npm
 
 ## Funcionalidades
 
@@ -14,3 +33,13 @@ Esta herramienta permite calcular el potencial de un proyecto de agrivoltaica a 
 2. Introduce los datos.
 3. Presiona **Calcular**.
 4. Opcionalmente descarga los resultados como PDF.
+
+## 📑 Datos utilizados
+
+Clasificación de cultivos: `parameters/clasificacion_cultivos.csv` → asigna tolerancia a la sombra.
+
+Ecuaciones de crecimiento: `parameters/Ecuaciones_CrecimVeg.csv` → coeficientes polinómicos para calcular YIELD en función de RSR.
+
+Clima:
+- Modelo estándar (parametrizado en el simulador).
+- Datos horarios reales desde PVGIS (a través del proxy server.js).

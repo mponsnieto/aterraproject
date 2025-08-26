@@ -64,7 +64,7 @@ async function calculate() {
     <li><strong>Fecha simulación:</strong> ${fecha_inicio.toISOString().split('T')[0]} → ${fecha_fin.toISOString().split('T')[0]}</li>
     <li><strong>Cobertura FV:</strong> ${coverage}</li>
     <li><strong>Transparencia paneles FV:</strong> ${tau_dir}</li>
-    <li><strong>Eficiencia FV:</strong> ${efficiency}%</li>
+    <li><strong>Eficiencia FV:</strong> ${efficiency*100}%</li>
   `;
   inputSummary.style.display = 'block';
 

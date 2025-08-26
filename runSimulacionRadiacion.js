@@ -40,7 +40,7 @@ function runSimulacionRadiacion(datos, paneles){
   const E_paneles_dias = [];
   const E_por_panel_dias = [];
 
-  console.log(`Área estimada del terreno = ${area_terreno.toFixed(2)} m²`);
+  console.log(`Estimación de ocupación del terreno = ${area_terreno.toFixed(2)} m²`);
 
   // === Bucle por días ===
   let dia = new Date(fecha_inicio);

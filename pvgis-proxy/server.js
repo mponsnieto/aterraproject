@@ -1,13 +1,20 @@
 // Node 18+ (tiene fetch nativo). Si usas Node <18, instala 'node-fetch'.
-import express from "express"; // o require('express') si usas CJS
-import cors from "cors";
+//import express from "express"; // o require('express') si usas CJS
+//import cors from "cors";
+
+const express = require("express");
+const cors = require("cors");
+const app = express();
+app.use(cors({
+  origin: ['https://mponsnieto.github.io', 'https://aterraproject.clusterteib.es'],
+  methods: ['GET']
+}));
+const compression = require("compression");
+const fetch = require("node-fetch");
 
 //const path = require("path");
 //app.use(express.static(path.join(__dirname, "public")));
 
-
-const app = express();
-app.use(cors()); // tu front le pega al backend, no a PVGIS
 
 // Utilidad: parsear el CSV TMY de PVGIS a objetos
 function parsePVGISTMY(csvText) {
@@ -129,6 +136,11 @@ app.get("/pvgis/dia", async (req, res) => {
   }
 });
 
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`PVGIS proxy escuchando en http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`PVGIS proxy escuchando en el puerto ${PORT}`);
+});
+
+
+/*const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`PVGIS proxy escuchando en http://localhost:${PORT}`));*/

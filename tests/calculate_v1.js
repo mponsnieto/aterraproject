@@ -28,7 +28,7 @@ async function calculate() {
   const h_pv = parseFloat(document.getElementById('h_pv').value); // Altura desde el suelo hasta el borde inferior del panel (m) 
   const inclinacion = parseFloat(document.getElementById('inclinacion').value); //% Ángulo entre el panel y la horizontal, en grados (0° = horizontal, 90° = vertical)
   const orientacion = parseFloat(document.getElementById('gamma').value); // % Ángulo de orientación del panel (180° = sur, 90° = este, 270° = oeste, 0° = norte)
-  const tau_dir = 0.1; // % Coeficiente de transmitancia directa del panel (entre 0 y 1)
+  const tau_dir = parseFloat(document.getElementById('tau_dir').value)/100; // % Coeficiente de transmitancia directa del panel (entre 0 y 1)
 
   //Datos cultivo
   const crop = document.getElementById('crop').value;

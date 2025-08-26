@@ -428,6 +428,7 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
   canvas.height = height;
 
   const ctx = canvas.getContext("2d");
+  ctx.innerHTML = ""; // Limpiar si ya existe
   const nRows = ygv.length;
   const nCols = xgv.length;
 

@@ -416,14 +416,17 @@ function daysCoverage(d1, d2, step) {
 
 function dayOfYear(d){ const start=new Date(d.getFullYear(),0,0); const diff=d-start; return Math.floor(diff/86400000); }
 
+let graficoPorPanel;
 
 function mostrarGraficoPaneles(E_por_panel_total) {
   const ctx = document.getElementById("graficoPorPanel").getContext("2d");
   ctx.innerHTML = ""; // Limpiar si ya existe
+
+  if(graficoPorPanel){graficoPorPanel.destroy();}
   
   const labels = E_por_panel_total.map((_, i) => `Panel ${i + 1}`);
   console.log("E_por_panel",E_por_panel_total);
-  new Chart(ctx, {
+  graficoPorPanel = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
@@ -708,45 +711,6 @@ async function leerDatosPVGISmasCercano(lat, lon, fechaISO) {
   if (!resp.ok) throw new Error(`Backend PVGIS respondió ${resp.status}`);
   const json = await resp.json();
   return json.datos || [];*/
-}
-
-function mostrarGraficoPaneles(E_por_panel_total) {
-  const ctx = document.getElementById("graficoPorPanel").getContext("2d");
-  ctx.innerHTML = ""; // Limpiar si ya existe
-  
-  const labels = E_por_panel_total.map((_, i) => `Panel ${i + 1}`);
-  console.log("E_por_panel",E_por_panel_total);
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Energía total por panel (kWh)',
-        data: E_por_panel_total,
-        backgroundColor: 'rgba(30, 144, 255, 0.6)',
-        borderColor: 'rgba(30, 144, 255, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: 'Energía total por panel'
-        }
-      },
-      scales: {
-        x: {
-          title: { display: true, text: 'Panel' }
-        },
-        y: {
-          title: { display: true, text: 'Energía (kWh)' },
-          beginAtZero: true
-        }
-      }
-    }
-  });
 }
 
 function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){

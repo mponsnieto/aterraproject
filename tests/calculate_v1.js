@@ -57,13 +57,13 @@ async function calculate() {
     <li><strong>Albedo:</strong> ${albedo}</li>
     <li><strong>Constante solar:</strong> ${G0} W/m²</li>
     <li><strong>Tipo de cultivo:</strong> ${crop}</li>
-    <li><strong>Rendimiento base:</strong> ${efficiency} kg/m²</li>
+    <li><strong>Rendimiento base:</strong> ${yieldBase} kg/ha</li>
     <li><strong>Tipo de hotel:</strong> ${hotel}</li>
     <li><strong>Precio venta energía:</strong> ${price} €/kWh</li>
     <li><strong>Modelo de clima:</strong> ${weather}</li>
     <li><strong>Fecha simulación:</strong> ${fecha_inicio.toISOString().split('T')[0]} → ${fecha_fin.toISOString().split('T')[0]}</li>
     <li><strong>Cobertura FV:</strong> ${coverage}</li>
-    <li><strong>Transparencia paneles FV:</strong> ${tau_dir}</li>
+    <li><strong>Transparencia paneles FV:</strong> ${tau_dir*100}</li>
     <li><strong>Eficiencia FV:</strong> ${efficiency*100}%</li>
   `;
   inputSummary.style.display = 'block';

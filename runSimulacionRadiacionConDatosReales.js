@@ -416,17 +416,17 @@ function daysCoverage(d1, d2, step) {
 
 function dayOfYear(d){ const start=new Date(d.getFullYear(),0,0); const diff=d-start; return Math.floor(diff/86400000); }
 
-let graficoPorPanel;
+let graficoPorPanel3;
 
 function mostrarGraficoPaneles(E_por_panel_total) {
   const ctx = document.getElementById("graficoPorPanel").getContext("2d");
   ctx.innerHTML = ""; // Limpiar si ya existe
 
-  if(graficoPorPanel){graficoPorPanel.destroy();}
+  if(graficoPorPanel3){graficoPorPanel3.destroy();}
   
   const labels = E_por_panel_total.map((_, i) => `Panel ${i + 1}`);
   console.log("E_por_panel",E_por_panel_total);
-  graficoPorPanel = new Chart(ctx, {
+  graficoPorPanel3 = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,

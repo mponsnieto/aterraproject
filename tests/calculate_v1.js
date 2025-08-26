@@ -140,7 +140,7 @@ async function calculate() {
     }
   });
 
-//const yieldBase = parseFloat(document.getElementById('yieldBase').value);
+
 const surfaceCultivable = area * (1 - coverage); // superficie no cubierta por paneles
 const cropProduction = yieldBase * surfaceCultivable; // kg estimados
 

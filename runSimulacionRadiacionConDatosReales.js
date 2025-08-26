@@ -702,7 +702,7 @@ function vectorNorm(vec) {
 // Devuelve [{Hora (decimal), DNI, DHI, GHI}, ...] entre 6–20h del día pedido
 async function leerDatosPVGISmasCercano(lat, lon, fechaISO) {
   const API_BASE = 'https://aterraserver.onrender.com'; // Servidor ejecutandose en Render
-  const resp = await fetch(`${API_BASE}/pvgis/dia?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&fecha=${fechaISO}`);
+  const resp = await fetch(`${API_BASE}/pvgis/dia?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&fecha=${encodeURIComponent(fechaISO)}`);
   if (!resp.ok) throw new Error('PVGIS día error');
   return (await resp.json()).datos || [];
   /*const url = `http://localhost:3000/pvgis/dia?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&fecha=${encodeURIComponent(fechaISO)}`;

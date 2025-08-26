@@ -1,7 +1,5 @@
 async function runSimulacionRadiacionConDatosReales (datos, paneles){
 
-
-
  const container = document.getElementById("visualRadiacion");
   container.innerHTML = ""; // Limpiar si ya existe
 

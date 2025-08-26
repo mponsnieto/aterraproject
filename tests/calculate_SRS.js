@@ -325,8 +325,9 @@ function mostrarbarplotSRS(RSR_media,porcentaje,YIELD) {
   const ctx = document.getElementById("graficoRSR").getContext("2d");
   ctx.innerHTML = ""; // Limpiar si ya existe
   
+  if (chart) chart.destroy();
   const labels = RSR_media.map(v => Math.round(v).toString());
-  new Chart(ctx, {
+  chart = new Chart(ctx, {
     type: 'bar',
     data:{
     	labels: labels,

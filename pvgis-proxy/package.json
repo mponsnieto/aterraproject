@@ -1,16 +1,14 @@
 {
   "name": "pvgis-proxy",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "type": "commonjs",
+  "private": true,
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^4.19.2",
+    "compression": "^1.7.4",
+    "node-fetch": "^2.6.7"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }

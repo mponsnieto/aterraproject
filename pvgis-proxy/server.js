@@ -5,10 +5,23 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+
+const ALLOWED_ORIGINS = [
+  "https://aterraproject.clusterteib.es",     // tu front en producción
+  "https://aterraserver.onrender.com",        // opcional (tests desde el mismo host)
+  "http://localhost:5173",                    // opcional (vite/local)
+  "http://localhost:3000"                     // opcional (local)
+];
+
 app.use(cors({
-  origin: ['https://mponsnieto.github.io', 'https://aterraproject.clusterteib.es'],
-  methods: ['GET']
+  origin: function (origin, cb) {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    return cb(new Error("CORS bloqueado para origin: " + origin));
+  },
+  methods: ["GET", "OPTIONS"],
+  credentials: false
 }));
+
 const compression = require("compression");
 const fetch = require("node-fetch");
 

@@ -92,7 +92,7 @@ async function calculate() {
   albedo: parseFloat(document.getElementById("albedo").value),
   cultivo: (document.getElementById("crop").value),
   margen,
-  tau_dir,
+  tau_dir : parseFloat(document.getElementById('tau_dir').value)/100,
   sunHours,
   f_gap,
   k_t,

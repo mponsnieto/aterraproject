@@ -32,7 +32,7 @@ async function calculate() {
 
   //Datos cultivo
   const crop = document.getElementById('crop').value;
-  const rendimiento = parseFloat(document.getElementById('yieldBase').value);
+  const yieldBase = parseFloat(document.getElementById('yieldBase').value);
 
   //Datos turismo
   const hotel = document.getElementById('hotel').value;

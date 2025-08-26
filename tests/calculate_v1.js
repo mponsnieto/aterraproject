@@ -37,7 +37,7 @@ async function calculate() {
   //Datos turismo
   const hotel = document.getElementById('hotel').value;
 
-  const coverage = parseFloat(document.getElementById('coverage').value) / 100;
+  const coverage = area;
   const efficiency = parseFloat(document.getElementById('efficiency').value) / 100;
   const price = parseFloat(document.getElementById('price').value);
   const sunHours = 5;

@@ -375,17 +375,17 @@ function meshgrid(x,y){
   return { XX, YY };
 }
 
-let graficoPorPanel;
+let graficoPorPanel2;
 
 function mostrarGraficoPaneles(E_por_panel_total) {
   const ctx = document.getElementById("graficoPorPanel").getContext("2d");
   ctx.innerHTML = ""; // Limpiar si ya existe
 
-  if(graficoPorPanel){graficoPorPanel.destroy();}
+  if(graficoPorPanel2){graficoPorPanel2.destroy();}
   
   const labels = E_por_panel_total.map((_, i) => `Panel ${i + 1}`);
   console.log("E_por_panel",E_por_panel_total);
-  graficoPorPanel = new Chart(ctx, {
+  graficoPorPanel2 = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,

@@ -1,3 +1,4 @@
+let chartRSR = null;
 function calculate_SRS(sistema, energia, paneles){
 	console.log('Voy a calcular SRS',sistema,energia)
 	
@@ -325,7 +326,7 @@ function mostrarbarplotSRS(RSR_media,porcentaje,YIELD) {
   const ctx = document.getElementById("graficoRSR").getContext("2d");
   ctx.innerHTML = ""; // Limpiar si ya existe
   
-  if (chartRSR) chart.destroy();
+  if (chartRSR) chartRSR.destroy();
   const labels = RSR_media.map(v => Math.round(v).toString());
   chartRSR = new Chart(ctx, {
     type: 'bar',

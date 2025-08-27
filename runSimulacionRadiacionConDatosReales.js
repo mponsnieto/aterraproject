@@ -1,212 +1,227 @@
 async function runSimulacionRadiacionConDatosReales (datos, paneles){
+  const btns = Array.from(document.querySelectorAll('button'));
+  try {
+    showLoader("Calculando simulación…");
+    btns.forEach(b => b.disabled = true);
 
- const container = document.getElementById("visualRadiacion");
-  container.innerHTML = ""; // Limpiar si ya existe
+     const container = document.getElementById("visualRadiacion");
+      container.innerHTML = ""; // Limpiar si ya existe
 
- //Realiza toda la simulación de radiación solar y devuelve resultados estructurados
- // === Parámetros de entrada ===
-  const {
-    fecha_inicio, fecha_fin,latitud, longitud, nFilas, nCols, margen, day_interval,
-    inclinacion, orientacion: gamma, albedo, malla, G0, tau_dir, f_gap,k_t, fd, sepY, sepX
-    } = datos;
+     //Realiza toda la simulación de radiación solar y devuelve resultados estructurados
+     // === Parámetros de entrada ===
+      const {
+        fecha_inicio, fecha_fin,latitud, longitud, nFilas, nCols, margen, day_interval,
+        inclinacion, orientacion: gamma, albedo, malla, G0, tau_dir, f_gap,k_t, fd, sepY, sepX
+        } = datos;
+      
+      beta=90-inclinacion;
+
+      if (!Array.isArray(paneles)) {
+      console.error("❌ 'paneles' no es un array válido:", paneles);
+      return;
+      }
+      console.log("datos:", datos);
+      // === Malla del terreno ===
+      const allX = paneles.flatMap(p => [p.PL[0], p.PR[0], p.TL[0], p.TR[0]]);
+      const allY = paneles.flatMap(p => [p.PL[1], p.PR[1], p.TL[1], p.TR[1]]);
+      const xmin = Math.min(...allX) - margen;
+      const xmax = Math.max(...allX) + margen;
+      const ymin = Math.min(...allY) - margen;
+      const ymax = Math.max(...allY) + margen;
+
+      const xgv = linspace(xmin, xmax, malla);
+      const ygv = linspace(ymin, ymax, malla);
+
+      const { XX, YY } = meshgrid(xgv, ygv);
+
+      const nRows = XX.length;
+      const nColsGrid = XX[0].length;
+      const area_terreno = (xmax - xmin) * (ymax - ymin);
+      const area_malla = area_terreno / (malla * malla);
+
+      const E_terreno_dias = [];
+      const E_paneles_dias = [];
+      const E_por_panel_dias = [];
+
+      console.log(`Área estimada del terreno = ${area_terreno.toFixed(2)} m²`);
+
+      // === Bucle por días ===
+      let dia = new Date(fecha_inicio);
+      const end = new Date(fecha_fin);
+
+      if (dia > end){
+        console.error("❌ la fecha de inicio no puede ser posterior a la final", paneles);
+        return;
+      }
+
+
+    for (let dia = new Date(fecha_inicio); dia <= new Date(fecha_fin); dia.setDate(dia.getDate() + day_interval)) {
+        showLoader("Descargando datos PVGIS…");
+        const yyyy = dia.getFullYear();
+        const mm = String(dia.getMonth() + 1).padStart(2, '0');
+        const dd = String(dia.getDate()).padStart(2, '0');
+        const fechaISO = `${yyyy}-${mm}-${dd}`;
+
+        // === 3.1) Leer datos PVGIS para este día ===
+        const datosDia = await leerDatosPVGISmasCercano(latitud, longitud, fechaISO);
+        // datosDia: [{Hora(dec), DNI, DHI, GHI}, ...] típicamente cada 60min
+        
+        if (!datosDia.length) {
+          // si no hay datos, crea matrices a cero y continúa
+          E_terreno_dias.push(zeros(nRows, nColsGrid));
+          E_paneles_dias.push(0);
+          E_por_panel_dias.push(new Array(nFilas * nCols).fill(0));
+          continue;
+        }
+
+      // === 3.2) Tiempo de simulación interno (ej. cada 900 s = 15 min) ===
+        const dt = 900; // s
+        const times = generateTimeSeries(dia, 6, 20, dt); // array de Date
+
+        // === 3.3) Acumuladores del día ===
+        const E_accum = zeros(nRows, nColsGrid);    // kWh/m² sobre terreno
+        const E_por_panel = new Array(nFilas * nCols).fill(0); // kWh por panel
+
+        // === 3.4) Lazo horario ===
+        for (let t = 0; t < times.length; t++) {
+          const time = times[t];
+
+          // — Buscar el registro PVGIS más cercano en hora decimal —
+          const horaDec = time.getUTCHours() + time.getUTCMinutes() / 60;
+          let reg = datosDia[0], bestDiff = Infinity;
+
+          showLoader("Procesando radiación…");
+
+          // Recorre directamente las muestras PVGIS:
+          for (const reg of datosDia) {
+            const DNI = reg.DNI, DHI = reg.DHI, GHI = reg.GHI;
+            if (DNI < 1 && DHI < 1 && GHI < 1) continue; // noche
+          }
+          for (const r of datosDia) {
+            const d = Math.abs(r.Hora - horaDec);
+            if (d < bestDiff) { bestDiff = d; reg = r; }
+          }
+          
+          // Irradiancias de PVGIS (clamp y safe)
+          const DNI = Math.max(0, Number(reg.DNI) || 0);
+          const DHI = Math.max(0, Number(reg.DHI) || 0);
+          const GHI = Math.max(0, Number(reg.GHI) || 0);
+          
+          //console.log(reg,horaDec,DNI);
+          
+          // Si todo es 0, salta rápido (noche o valores nulos)
+          if (DNI === 0 && DHI === 0 && GHI === 0) continue;
+
+          
+
+          // — Vector solar aproximado a partir de irradiancias —
+          const { sunAz, sunAlt } = sunPositionLike(time, latitud, longitud);
+          if (!Number.isFinite(sunAlt) || sunAlt <= 0) continue;
+          const sv = normalize([
+            Math.cos(deg2rad(sunAlt)) * Math.sin(deg2rad(sunAz)),
+            Math.cos(deg2rad(sunAlt)) * Math.cos(deg2rad(sunAz)),
+            Math.sin(deg2rad(sunAlt))
+          ]);
+
+          console.log(reg,horaDec,DNI);
+
+          // — Normal del panel —
+          const nn = normalize([
+            Math.sin(deg2rad(beta)) * Math.sin(deg2rad(gamma)),
+            Math.sin(deg2rad(beta)) * Math.cos(deg2rad(gamma)),
+            Math.cos(deg2rad(beta))
+          ]);
+          const cos_theta_i = Math.max(0, dot(nn, sv));
+
+          // Radiación sobre panel inclinado (directa + difusa + reflejada)
+          const DNI_pv = Math.max(0, DNI * cos_theta_i);
+          const DHI_pv = DHI * (1 + Math.cos(deg2rad(beta))) / 2;
+
+          console.log(DNI_pv,DHI_pv);
+
+          // === Terreno: sombreado celda a celda ===
+          for (let i = 0; i < nRows; i++) {
+            for (let j = 0; j < nColsGrid; j++) {
+              const P = [XX[i][j], YY[i][j], 0];
+              let inShadow = false;
+              for (let k = 0; k < paneles.length; k++) {
+                if (rayIntersectsPanel(P, sv, paneles[k])) { inShadow = true; break; }
+              }
+              // Transparencias y gaps
+              const I_dir = DNI * (inShadow ? (Number.isFinite(tau_dir) ? tau_dir : 0) : 1);
+              const f_vis = inShadow ? (Number.isFinite(f_gap) ? f_gap : 0) : 1;
+              const I_dif = DHI * f_vis;
+              const I_ref = (Number.isFinite(albedo) ? albedo : 0) * (I_dir + I_dif);
+              let I_total = I_dir + I_dif + I_ref;
+              if (!Number.isFinite(I_total) || I_total < 0) I_total = 0;
+              //console.log(I_total);
+
+              // Acumular kWh/m²
+              E_accum[i][j] += I_total * (dt / 3600) / 1000;
+            }
+          }
+
+          // === Paneles: sombreado “panel a panel” ===
+          for (let p = 0; p < paneles.length; p++) {
+            const V = paneles[p];
+            // Sombra por otros paneles (chequeo en 3 puntos)
+            const pts = [
+              averagePoints([V.PL, V.PR, V.TL, V.TR]),
+              V.PL, V.PR
+            ];
+            let sombra = false;
+            for (let q = 0; q < paneles.length && !sombra; q++) if (q !== p) {
+              for (let pp = 0; pp < pts.length; pp++) {
+                if (rayIntersectsPanel(pts[pp], sv, paneles[q])) { sombra = true; break; }
+              }
+            }
+            if (sombra) continue;
+
+            const areaPanel = vectorNorm(cross(sub(V.PR, V.PL), sub(V.TL, V.PL)));
+            const I_ref_pv = (Number.isFinite(albedo) ? albedo : 0) * GHI * (1 + Math.cos(deg2rad(beta))) / 2;
+            let I_total_pv = Math.max(0, DNI_pv) + Math.max(0, DHI_pv) + Math.max(0, I_ref_pv);
+            if (!Number.isFinite(I_total_pv)) I_total_pv = 0;
+
+            E_por_panel[p] += I_total_pv * areaPanel * (dt / 3600) / 1000; // kWh por panel
+          }
+        } // fin lazo horario
+        console.log(E_accum,E_por_panel);
+        // Guardar el día
+        E_terreno_dias.push(sanitizeGrid(E_accum, 0));
+        E_paneles_dias.push(E_por_panel.reduce((a, b) => a + b, 0));
+        E_por_panel_dias.push(E_por_panel);
+      } // fin lazo días
+
+      // === 4) Acumulados multi-día ===
+      showLoader("Generando gráficos…");
+      const { dias_por_intervalo } = daysCoverage(new Date(fecha_inicio), new Date(fecha_fin), day_interval);
+      const E_terreno_total = accumulateTerreno(E_terreno_dias, dias_por_intervalo);
+      const E_por_panel_total = sumPaneles(E_por_panel_dias, dias_por_intervalo);
+      const E_paneles_total = E_por_panel_total.reduce((a, b) => a + b, 0);
+
+      mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles)
+      mostrarGraficoPaneles(E_por_panel_total)
+
+      return {
+        E_paneles_dias,
+        E_por_panel_dias,
+        E_paneles_total,
+        E_por_panel_total,
+        xgv, ygv,
+        Area_terreno: area_terreno,
+        Area_malla: area_malla,
+        E_terreno_dias,
+        E_terreno_total,
+        fecha_inicio, fecha_fin, latitud, longitud
+      };
+  } catch (err) {
+    console.error(err);
+    alert("Ha ocurrido un error en la simulación. Revisa la consola.");
+  } finally {
+    hideLoader();
+    btns.forEach(b => b.disabled = false);
+  }
   
-  beta=90-inclinacion;
-
-  if (!Array.isArray(paneles)) {
-  console.error("❌ 'paneles' no es un array válido:", paneles);
-  return;
-  }
-  console.log("datos:", datos);
-  // === Malla del terreno ===
-  const allX = paneles.flatMap(p => [p.PL[0], p.PR[0], p.TL[0], p.TR[0]]);
-  const allY = paneles.flatMap(p => [p.PL[1], p.PR[1], p.TL[1], p.TR[1]]);
-  const xmin = Math.min(...allX) - margen;
-  const xmax = Math.max(...allX) + margen;
-  const ymin = Math.min(...allY) - margen;
-  const ymax = Math.max(...allY) + margen;
-
-  const xgv = linspace(xmin, xmax, malla);
-  const ygv = linspace(ymin, ymax, malla);
-
-  const { XX, YY } = meshgrid(xgv, ygv);
-
-  const nRows = XX.length;
-  const nColsGrid = XX[0].length;
-  const area_terreno = (xmax - xmin) * (ymax - ymin);
-  const area_malla = area_terreno / (malla * malla);
-
-  const E_terreno_dias = [];
-  const E_paneles_dias = [];
-  const E_por_panel_dias = [];
-
-  console.log(`Área estimada del terreno = ${area_terreno.toFixed(2)} m²`);
-
-  // === Bucle por días ===
-  let dia = new Date(fecha_inicio);
-  const end = new Date(fecha_fin);
-
-  if (dia > end){
-    console.error("❌ la fecha de inicio no puede ser posterior a la final", paneles);
-    return;
-  }
-
-for (let dia = new Date(fecha_inicio); dia <= new Date(fecha_fin); dia.setDate(dia.getDate() + day_interval)) {
-    const yyyy = dia.getFullYear();
-    const mm = String(dia.getMonth() + 1).padStart(2, '0');
-    const dd = String(dia.getDate()).padStart(2, '0');
-    const fechaISO = `${yyyy}-${mm}-${dd}`;
-
-    // === 3.1) Leer datos PVGIS para este día (06–20h) ===
-    const datosDia = await leerDatosPVGISmasCercano(latitud, longitud, fechaISO);
-    // datosDia: [{Hora(dec), DNI, DHI, GHI}, ...] típicamente cada 60min
-    
-    if (!datosDia.length) {
-      // si no hay datos, crea matrices a cero y continúa
-      E_terreno_dias.push(zeros(nRows, nColsGrid));
-      E_paneles_dias.push(0);
-      E_por_panel_dias.push(new Array(nFilas * nCols).fill(0));
-      continue;
-    }
-
-  // === 3.2) Tiempo de simulación interno (ej. cada 900 s = 15 min) ===
-    const dt = 900; // s
-    const times = generateTimeSeries(dia, 6, 20, dt); // array de Date
-
-    // === 3.3) Acumuladores del día ===
-    const E_accum = zeros(nRows, nColsGrid);    // kWh/m² sobre terreno
-    const E_por_panel = new Array(nFilas * nCols).fill(0); // kWh por panel
-
-    // === 3.4) Lazo horario ===
-    for (let t = 0; t < times.length; t++) {
-      const time = times[t];
-
-      // — Buscar el registro PVGIS más cercano en hora decimal —
-      const horaDec = time.getUTCHours() + time.getUTCMinutes() / 60;
-      let reg = datosDia[0], bestDiff = Infinity;
-
-
-
-      // Recorre directamente las muestras PVGIS:
-      for (const reg of datosDia) {
-        const DNI = reg.DNI, DHI = reg.DHI, GHI = reg.GHI;
-        if (DNI < 1 && DHI < 1 && GHI < 1) continue; // noche
-      }
-      for (const r of datosDia) {
-        const d = Math.abs(r.Hora - horaDec);
-        if (d < bestDiff) { bestDiff = d; reg = r; }
-      }
-      
-      // Irradiancias de PVGIS (clamp y safe)
-      const DNI = Math.max(0, Number(reg.DNI) || 0);
-      const DHI = Math.max(0, Number(reg.DHI) || 0);
-      const GHI = Math.max(0, Number(reg.GHI) || 0);
-      
-      //console.log(reg,horaDec,DNI);
-      
-      // Si todo es 0, salta rápido (noche o valores nulos)
-      if (DNI === 0 && DHI === 0 && GHI === 0) continue;
-
-      
-
-      // — Vector solar aproximado a partir de irradiancias —
-      const { sunAz, sunAlt } = sunPositionLike(time, latitud, longitud);
-      if (!Number.isFinite(sunAlt) || sunAlt <= 0) continue;
-      const sv = normalize([
-        Math.cos(deg2rad(sunAlt)) * Math.sin(deg2rad(sunAz)),
-        Math.cos(deg2rad(sunAlt)) * Math.cos(deg2rad(sunAz)),
-        Math.sin(deg2rad(sunAlt))
-      ]);
-
-      console.log(reg,horaDec,DNI);
-
-      // — Normal del panel —
-      const nn = normalize([
-        Math.sin(deg2rad(beta)) * Math.sin(deg2rad(gamma)),
-        Math.sin(deg2rad(beta)) * Math.cos(deg2rad(gamma)),
-        Math.cos(deg2rad(beta))
-      ]);
-      const cos_theta_i = Math.max(0, dot(nn, sv));
-
-      // Radiación sobre panel inclinado (directa + difusa + reflejada)
-      const DNI_pv = Math.max(0, DNI * cos_theta_i);
-      const DHI_pv = DHI * (1 + Math.cos(deg2rad(beta))) / 2;
-
-      console.log(DNI_pv,DHI_pv);
-
-      // === Terreno: sombreado celda a celda ===
-      for (let i = 0; i < nRows; i++) {
-        for (let j = 0; j < nColsGrid; j++) {
-          const P = [XX[i][j], YY[i][j], 0];
-          let inShadow = false;
-          for (let k = 0; k < paneles.length; k++) {
-            if (rayIntersectsPanel(P, sv, paneles[k])) { inShadow = true; break; }
-          }
-          // Transparencias y gaps
-          const I_dir = DNI * (inShadow ? (Number.isFinite(tau_dir) ? tau_dir : 0) : 1);
-          const f_vis = inShadow ? (Number.isFinite(f_gap) ? f_gap : 0) : 1;
-          const I_dif = DHI * f_vis;
-          const I_ref = (Number.isFinite(albedo) ? albedo : 0) * (I_dir + I_dif);
-          let I_total = I_dir + I_dif + I_ref;
-          if (!Number.isFinite(I_total) || I_total < 0) I_total = 0;
-          //console.log(I_total);
-
-          // Acumular kWh/m²
-          E_accum[i][j] += I_total * (dt / 3600) / 1000;
-        }
-      }
-
-      // === Paneles: sombreado “panel a panel” ===
-      for (let p = 0; p < paneles.length; p++) {
-        const V = paneles[p];
-        // Sombra por otros paneles (chequeo en 3 puntos)
-        const pts = [
-          averagePoints([V.PL, V.PR, V.TL, V.TR]),
-          V.PL, V.PR
-        ];
-        let sombra = false;
-        for (let q = 0; q < paneles.length && !sombra; q++) if (q !== p) {
-          for (let pp = 0; pp < pts.length; pp++) {
-            if (rayIntersectsPanel(pts[pp], sv, paneles[q])) { sombra = true; break; }
-          }
-        }
-        if (sombra) continue;
-
-        const areaPanel = vectorNorm(cross(sub(V.PR, V.PL), sub(V.TL, V.PL)));
-        const I_ref_pv = (Number.isFinite(albedo) ? albedo : 0) * GHI * (1 + Math.cos(deg2rad(beta))) / 2;
-        let I_total_pv = Math.max(0, DNI_pv) + Math.max(0, DHI_pv) + Math.max(0, I_ref_pv);
-        if (!Number.isFinite(I_total_pv)) I_total_pv = 0;
-
-        E_por_panel[p] += I_total_pv * areaPanel * (dt / 3600) / 1000; // kWh por panel
-      }
-    } // fin lazo horario
-    console.log(E_accum,E_por_panel);
-    // Guardar el día
-    E_terreno_dias.push(sanitizeGrid(E_accum, 0));
-    E_paneles_dias.push(E_por_panel.reduce((a, b) => a + b, 0));
-    E_por_panel_dias.push(E_por_panel);
-  } // fin lazo días
-
-  // === 4) Acumulados multi-día ===
-  const { dias_por_intervalo } = daysCoverage(new Date(fecha_inicio), new Date(fecha_fin), day_interval);
-  const E_terreno_total = accumulateTerreno(E_terreno_dias, dias_por_intervalo);
-  const E_por_panel_total = sumPaneles(E_por_panel_dias, dias_por_intervalo);
-  const E_paneles_total = E_por_panel_total.reduce((a, b) => a + b, 0);
-
-  mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles)
-  mostrarGraficoPaneles(E_por_panel_total)
-
-  return {
-    E_paneles_dias,
-    E_por_panel_dias,
-    E_paneles_total,
-    E_por_panel_total,
-    xgv, ygv,
-    Area_terreno: area_terreno,
-    Area_malla: area_malla,
-    E_terreno_dias,
-    E_terreno_total,
-    fecha_inicio, fecha_fin, latitud, longitud
-  };
 }
 
 function sunPositionLike(time, lat, lon) {
@@ -847,4 +862,21 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
   container.appendChild(titulo);
 
   container.appendChild(canvas);
+}
+
+function showLoader(msg = "Calculando…") {
+  const ov = document.getElementById("loaderOverlay");
+  if (!ov) return;
+  const t = ov.querySelector(".loader-text");
+  if (t) t.textContent = msg;
+  ov.style.display = "flex";
+  // opcional: bloquear scroll
+  document.body.style.overflow = "hidden";
+}
+
+function hideLoader() {
+  const ov = document.getElementById("loaderOverlay");
+  if (!ov) return;
+  ov.style.display = "none";
+  document.body.style.overflow = "";
 }

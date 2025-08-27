@@ -52,7 +52,7 @@ async function calculate() {
   const inputSummary = document.getElementById('inputSummary');
   const inputList = document.getElementById('inputSummaryList');
   inputList.innerHTML = `
-    <li><strong>Superficie:</strong> ${area} m²</li>
+    <li><strong>Superficie total:</strong> ${area} m²</li>
     <li><strong>Coordenadas:</strong> ${latitud}, ${longitud}</li>
     <li><strong>Albedo:</strong> ${albedo}</li>
     <li><strong>Constante solar:</strong> ${G0} W/m²</li>
@@ -63,14 +63,10 @@ async function calculate() {
     <li><strong>Modelo de clima:</strong> ${weather}</li>
     <li><strong>Fecha simulación:</strong> ${fecha_inicio.toISOString().split('T')[0]} → ${fecha_fin.toISOString().split('T')[0]}</li>
     <li><strong>Cobertura FV:</strong> ${coverage}</li>
-    <li><strong>Transparencia paneles FV:</strong> ${tau_dir*100}</li>
+    <li><strong>Transparencia paneles FV:</strong> ${tau_dir*100}%</li>
     <li><strong>Eficiencia FV:</strong> ${efficiency*100}%</li>
   `;
   inputSummary.style.display = 'block';
-
-  const powerInstalled = area * coverage * efficiency;
-  const productionAnnual = powerInstalled * sunHours * 365;
-  const revenue = productionAnnual * price;
 
   //const resultadoArreglos = simularArreglos({fecha_inicio,fecha_fin,day_interval,latitud,longitud,nFilas,nCols,sepX,sepY,margen,panelW,panelL,h_pv,inclinacion,orientacion,albedo,resolucion_malla,G0,tau_dir,f_gap,k_t,fd});
 
@@ -93,11 +89,13 @@ async function calculate() {
   cultivo: (document.getElementById("crop").value),
   margen,
   tau_dir : parseFloat(document.getElementById('tau_dir').value)/100,
+  yieldBase : parseFloat(document.getElementById('yieldBase').value),
   sunHours,
   f_gap,
   k_t,
   fd,
   malla,
+  area: parseFloat(document.getElementById('area').value),
   orientacion: parseFloat(document.getElementById("gamma").value)
   };
 
@@ -115,8 +113,12 @@ async function calculate() {
 
   const resultados = calculate_SRS(datosVisual, energia, paneles);
 
+  const powerInstalled = area * coverage * efficiency;
+  const productionAnnual = energia.E_paneles_total;
+  const revenue = productionAnnual * price;
+
   document.getElementById('power').textContent = powerInstalled.toFixed(2);
-  document.getElementById('production').textContent = productionAnnual.toFixed(0);
+  document.getElementById('production').textContent = energia.E_paneles_total.toFixed(2);
   document.getElementById('revenue').textContent = revenue.toFixed(2);
   document.getElementById('results').style.display = 'block';
 
@@ -141,11 +143,9 @@ async function calculate() {
   });
 
 
-const surfaceCultivable = area * (1 - coverage); // superficie no cubierta por paneles
-const cropProduction = yieldBase * surfaceCultivable; // kg estimados
-
 // Mostrar resultado
 let cropName = crop.charAt(0).toUpperCase() + crop.slice(1);
-document.getElementById('cropProductionResult').textContent = `${cropProduction.toFixed(0)} kg (${cropName})`;
-}
+document.getElementById('cropProductionResult').textContent = `${resultados.cropProduction.toFixed(0)} kg de ${cropName} en ${resultados.area_Agri.toFixed(2)} m²`;
 
+document.getElementById('cropProductionFree').textContent = `${resultados.cropProduction_free.toFixed(0)} kg de ${cropName} en ${resultados.area_noAgri.toFixed(2)} m²`;
+}

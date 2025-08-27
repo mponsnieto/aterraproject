@@ -104,7 +104,7 @@
       </select>
 
       <label>Rendimiento base (kg/ha):</label>
-      <input type="number" id="yieldBase" placeholder="Ej: 2.5" value="2.5">
+      <input type="number" id="yieldBase" placeholder="Ej: 22500" value="22500">
 
       <h3>Datos del consumidor turístico</h3>
       <label>Tipo de hotel:</label>
@@ -179,6 +179,10 @@
 
     <div id="visualizacion3D" style="width: 100%; height: 600px; margin-top: 30px;"></div>
 
+    <div id="loaderOverlay" aria-live="polite" style="display:none;">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Calculando…</div>
+    </div>
     
     <div id="visualRadiacion" style="margin-top:20px;margin: 0px auto; background: #fff8e1"></div>
     <canvas id="graficoPorPanel" width="600" height="300" style="margin-top: 30px;"></canvas>
@@ -188,9 +192,11 @@
 
     <div class="results" id="results" style="display:none;">
       <p><strong>Potencia instalada estimada:</strong> <span id="power"></span> kWp</p>
-      <p><strong>Producción anual estimada:</strong> <span id="production"></span> kWh/año</p>
-      <p><strong>Ingresos anuales estimados:</strong> <span id="revenue"></span> €</p>
-      <p><strong>Producción estimada de:</strong> <span id="cropProductionResult"></span></p>
+      <p><strong>Energia producida:</strong> <span id="production"></span> kWh/año</p>
+      <p><strong>Ingresos anuales por venta de energía:</strong> <span id="revenue"></span> €</p>
+      <p><strong>Producción bajo superficie agrivoltaica:</strong> <span id="cropProductionResult"></span></p>
+      <p><strong>Producción bajo superficie libre (yieldbase):</strong> <span id="cropProductionFree"></span></p>
+      <p><strong>*A tener en cuenta que estos datos no son representativos si no se ha simulado un año natural*</strong></p>
       <canvas id="resultsChart" width="400" height="200"></canvas>
     </div>
   </div>
@@ -206,7 +212,7 @@
 
 
 
-  <!-- Tu visualizador -->
+  <!-- El visualizador -->
   <script src="visual3d.js"></script>
   <script src="runSimulacionRadiacion.js"></script>
   <script src="runSimulacionRadiacionConDatosReales.js"></script>
@@ -222,4 +228,26 @@
   <img src="images/LogoFondos.png" alt="Logo Clúster TEIB" style="height: 70px;">
 </footer>
 </body>
+
+<style>
+  #loaderOverlay{
+    position: fixed; inset: 0; 
+    background: rgba(255,255,255,0.8);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+  }
+  .loader-spinner{
+    width: 56px; height: 56px;
+    border: 6px solid #e3eaf2;
+    border-top-color: #2e8b57; /* color principal */
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  .loader-text{
+    margin-top: 12px; font-weight: 600; color: #2e3a4d;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
 </html>

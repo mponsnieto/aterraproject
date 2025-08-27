@@ -173,7 +173,7 @@ function runSimulacionRadiacion(datos, paneles){
   const E_terreno_total = accumulateTerreno(E_terreno_dias, dias_por_intervalo);
   const allVals=E_terreno_total.flat(Infinity)  // aplana todos los niveles
                                .filter(v => Number.isFinite(v));
-  console.log("dias_por_intervalo",dias_por_intervalo,"E_por_panel_dias", E_por_panel_dias,"E_por_panel_total", E_por_panel_total, "E_terreno_total", allVals)
+  console.log("dias_por_intervalo",dias_por_intervalo,"E_paneles_total", E_paneles_total,"E_por_panel_dias", E_por_panel_dias,"E_por_panel_total", E_por_panel_total, "E_terreno_total", allVals)
   mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles)
   mostrarGraficoPaneles(E_por_panel_total)
 

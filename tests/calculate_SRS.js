@@ -1,6 +1,6 @@
 let chartRSR = null;
 function calculate_SRS(sistema, energia, paneles){
-	console.log('Voy a calcular SRS',sistema,energia)
+	console.log('Voy a calcular SRS',sistema,energia,paneles)
 	
 	// 1. Leer la tabla desde el archivo CSV
 	const tablaCultivos = parseCSV(read_clasificacion_clutivos());
@@ -132,7 +132,18 @@ function calculate_SRS(sistema, energia, paneles){
 
 	mostrarbarplotSRS(RSR_media,porcentaje,YIELD);
 
-	
+  const sumaProductos = YIELD.reduce((acc, y, i) => acc + sistema.yieldBase/10000*y/100 *energia.Area_terreno* (porcentaje[i]/100 || 0), 0);
+  const area_noAgri =sistema.area-energia.Area_terreno;
+  const cropProduction_free = sistema.yieldBase/10000 *(area_noAgri);
+
+  console.log("-------------------",sumaProductos);//energia.Area_terreno*YIELD*porcentaje);
+
+	return {
+    cropProduction:sumaProductos,
+    area_Agri: energia.Area_terreno,
+    area_noAgri,
+    cropProduction_free
+  };
 /*
 
 	// Mostrar barplot

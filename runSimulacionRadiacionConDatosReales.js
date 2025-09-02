@@ -227,7 +227,6 @@ async function runSimulacionRadiacionConDatosReales (datos, paneles){
   
 }
 
-let graficoEnergiaMes; // variable global para evitar el error de canvas en uso
 function renderEnergiaPorMes(labels, values){
   const ctx = document.getElementById('graficoMensual').getContext('2d');
   if (graficoEnergiaMes) graficoEnergiaMes.destroy();

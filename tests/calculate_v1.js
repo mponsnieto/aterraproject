@@ -37,10 +37,10 @@ async function calculate() {
   //Datos turismo
   const hotel = document.getElementById('hotel').value;
 
-  const coverage = area;
+  const coverage = nFilas * nCols * panelW * panelH;
+  console.log("coverage",coverage);
   const efficiency = parseFloat(document.getElementById('efficiency').value) / 100;
   const price = parseFloat(document.getElementById('price').value);
-  const sunHours = 5;
 
   if (isNaN(area) || isNaN(nFilas) || isNaN(efficiency) || isNaN(latitud) || isNaN(longitud)) {
     alert("Por favor, completa todos los campos con valores válidos.");
@@ -53,16 +53,15 @@ async function calculate() {
   const inputList = document.getElementById('inputSummaryList');
   inputList.innerHTML = `
     <li><strong>Superficie total:</strong> ${area} m²</li>
+    <li><strong>Superficie FV:</strong> ${coverage} m²</li>
     <li><strong>Coordenadas:</strong> ${latitud}, ${longitud}</li>
     <li><strong>Albedo:</strong> ${albedo}</li>
     <li><strong>Constante solar:</strong> ${G0} W/m²</li>
     <li><strong>Tipo de cultivo:</strong> ${crop}</li>
     <li><strong>Rendimiento base:</strong> ${yieldBase} kg/ha</li>
-    <li><strong>Tipo de hotel:</strong> ${hotel}</li>
     <li><strong>Precio venta energía:</strong> ${price} €/kWh</li>
     <li><strong>Modelo de clima:</strong> ${weather}</li>
     <li><strong>Fecha simulación:</strong> ${fecha_inicio.toISOString().split('T')[0]} → ${fecha_fin.toISOString().split('T')[0]}</li>
-    <li><strong>Cobertura FV:</strong> ${coverage}</li>
     <li><strong>Transparencia paneles FV:</strong> ${tau_dir*100}%</li>
     <li><strong>Eficiencia FV:</strong> ${efficiency*100}%</li>
   `;
@@ -90,7 +89,6 @@ async function calculate() {
   margen,
   tau_dir : parseFloat(document.getElementById('tau_dir').value)/100,
   yieldBase : parseFloat(document.getElementById('yieldBase').value),
-  sunHours,
   f_gap,
   k_t,
   fd,

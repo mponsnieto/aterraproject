@@ -176,6 +176,8 @@ function runSimulacionRadiacion(datos, paneles){
   console.log("dias_por_intervalo",dias_por_intervalo,"E_paneles_total", E_paneles_total,"E_por_panel_dias", E_por_panel_dias,"E_por_panel_total", E_por_panel_total, "E_terreno_total", allVals)
   mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles)
   mostrarGraficoPaneles(E_por_panel_total)
+  const { byMonth, labels, values } = agruparEnergiaPorMes(fecha_inicio, fecha_fin, day_interval, E_paneles_dias);
+  renderEnergiaPorMes(labels, values);
 
   // === 6. Empaquetar resultados ===
   return {
@@ -418,6 +420,41 @@ function mostrarGraficoPaneles(E_por_panel_total) {
   });
 }
 
+let graficoEnergiaMes; // variable global para evitar el error de canvas en uso
+function renderEnergiaPorMes(labels, values){
+  const ctx = document.getElementById('graficoMensual').getContext('2d');
+  if (graficoEnergiaMes) graficoEnergiaMes.destroy();
+  graficoEnergiaMes = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Energía total (kWh) por mes',
+        data: values,
+        backgroundColor: 'rgba(46,139,87,0.6)'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: { display: true, text: 'Energía total mensual (kWh)' },
+        tooltip: { callbacks: {
+          label: (ctx) => `${ctx.parsed.y.toFixed(0)} kWh`
+        }}
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'kWh' }
+        },
+        x: {
+          title: { display: true, text: 'Mes (YYYY-MM)' }
+        }
+      }
+    }
+  });
+}
+
 function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
   console.log("--------E_terreno_total---",E_terreno_total)
   const canvas = document.createElement("canvas");
@@ -649,4 +686,63 @@ function averagePoints(points) {
 
 function vectorNorm(vec) {
   return Math.sqrt(vec.reduce((sum, val) => sum + val * val, 0));
+}
+
+// Utilidades de fecha en UTC para evitar desfases por huso
+function toUTCDate(y, m, d){ return new Date(Date.UTC(y, m - 1, d)); }
+function addDaysUTC(d, n){ const x = new Date(d.getTime()); x.setUTCDate(x.getUTCDate() + n); return x; }
+function ymdUTC(d){ return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() }; }
+function ymKey(d){ const { y, m } = ymdUTC(d); return `${y}-${String(m).padStart(2,'0')}`; }
+
+function generarDiasYpesos(fecha_inicio, fecha_fin, day_interval){
+  const start = new Date(fecha_inicio);
+  const end   = new Date(fecha_fin);
+  // Pasar a UTC "puro"
+  const s = toUTCDate(start.getFullYear(), start.getMonth()+1, start.getDate());
+  const e = toUTCDate(end.getFullYear(),   end.getMonth()+1,   end.getDate());
+
+  const dias = [];
+  for (let d = new Date(s); d <= e; d = addDaysUTC(d, day_interval)) dias.push(new Date(d));
+
+  // Pesos: nº de días que representa cada muestra; el último puede ser menor
+  const dayOfYear = d => {
+    const jan0 = Date.UTC(d.getUTCFullYear(), 0, 0);
+    return Math.floor((d.getTime() - jan0) / 86400000);
+  };
+  const n1 = dayOfYear(s), n2 = dayOfYear(e);
+  const pesos = Array(dias.length).fill(day_interval);
+  if (pesos.length) {
+    const lastRep = dias[dias.length - 1];
+    pesos[pesos.length - 1] = (n2 - dayOfYear(lastRep)) + 1; // días restantes hasta fin
+  }
+  return { dias, pesos }; // ambas arrays de igual longitud
+}
+
+function agruparEnergiaPorMes(fecha_inicio, fecha_fin, day_interval, E_paneles_dias){
+  const { dias, pesos } = generarDiasYpesos(fecha_inicio, fecha_fin, day_interval);
+  if (E_paneles_dias.length !== dias.length) {
+    console.warn("Longitudes no coinciden: E_paneles_dias vs dias simulados.",
+                 E_paneles_dias.length, dias.length);
+  }
+  const byMonth = {}; // { 'YYYY-MM': kWh }
+
+  for (let i = 0; i < dias.length; i++){
+    const repDate = dias[i];
+    const w = Math.max(1, pesos[i] || 1);         // nº de días reales que representa
+    const eRep = Number(E_paneles_dias[i]) || 0;  // kWh/día “representativo”
+
+    // Repartimos ese valor por cada día real del bloque
+    const ePerDay = eRep; // si E_paneles_dias ya es kWh/día, cada día del bloque recibe eRep
+    for (let d = 0; d < w; d++){
+      const theDay = addDaysUTC(repDate, d);
+      const key = ymKey(theDay);
+      byMonth[key] = (byMonth[key] || 0) + ePerDay;
+    }
+  }
+
+  // Orden cronológico de claves
+  const keys = Object.keys(byMonth).sort((a,b) => a.localeCompare(b));
+  const vals = keys.map(k => byMonth[k]);
+
+  return { byMonth, labels: keys, values: vals };
 }

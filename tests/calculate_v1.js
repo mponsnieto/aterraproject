@@ -12,7 +12,7 @@ async function calculate() {
   const longitud =  parseFloat(document.getElementById('longitud').value);  //Longitud del lugar (positiva hacia el este) (grados decimales)
   const malla = parseFloat(document.getElementById('resolucion_malla').value)
   const albedo = parseFloat(document.getElementById('albedo').value)
-  const G0 = parseFloat(document.getElementById('G0').value); //Constante solar
+  const G0 = 1367; //Constante solar
   const f_gap = 0.2; //Fracción de cielo visible bajo panel (entre 0 y 1)
   const k_t = 0.7; //Índice de claridad medio (Liu & Jordan)
   const fd = 0.2; //fracción difusa estimada
@@ -56,7 +56,6 @@ async function calculate() {
     <li><strong>Superficie FV:</strong> ${coverage} m²</li>
     <li><strong>Coordenadas:</strong> ${latitud}, ${longitud}</li>
     <li><strong>Albedo:</strong> ${albedo}</li>
-    <li><strong>Constante solar:</strong> ${G0} W/m²</li>
     <li><strong>Tipo de cultivo:</strong> ${crop}</li>
     <li><strong>Rendimiento base:</strong> ${yieldBase} kg/ha</li>
     <li><strong>Precio venta energía:</strong> ${price} €/kWh</li>
@@ -82,7 +81,7 @@ async function calculate() {
   panelL: parseFloat(document.getElementById("panelH").value), // ojo: H=longitud
   h_pv: parseFloat(document.getElementById("h_pv").value),
   inclinacion: parseFloat(document.getElementById("inclinacion").value),
-  G0: parseFloat(document.getElementById("G0").value),
+  G0,
   day_interval: parseFloat(document.getElementById("day_interval").value),
   albedo: parseFloat(document.getElementById("albedo").value),
   cultivo: (document.getElementById("crop").value),

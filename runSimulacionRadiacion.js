@@ -54,7 +54,7 @@ function runSimulacionRadiacion(datos, paneles){
   while (dia <= end) {
     console.log("dia:", dia);
     const dt = 900; // segundos (15 min)
-    const times = generateTimeSeries(dia, 7, 19, dt);
+    const times = generateTimeSeries(dia, 4, 22, dt);
     const n = getDayOfYear(dia);
     const G_on = G0 * (1 + 0.033 * Math.cos((2 * Math.PI / 365) * (n - 1)));
     console.log("G0", G0, "n:", n);
@@ -75,8 +75,8 @@ function runSimulacionRadiacion(datos, paneles){
         ]);
 
         const nn = normalize([
-          Math.sin(deg2rad(beta)) * Math.sin(deg2rad(gamma)),
           Math.sin(deg2rad(beta)) * Math.cos(deg2rad(gamma)),
+          Math.sin(deg2rad(beta)) * Math.sin(deg2rad(gamma)),
           Math.cos(deg2rad(beta))
         ]);
 

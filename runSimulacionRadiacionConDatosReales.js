@@ -127,10 +127,10 @@ async function runSimulacionRadiacionConDatosReales (datos, paneles){
 
           // — Normal del panel —
           const nn = normalize([
-            Math.sin(deg2rad(beta)) * Math.sin(deg2rad(gamma)),
-            Math.sin(deg2rad(beta)) * Math.cos(deg2rad(gamma)),
-            Math.cos(deg2rad(beta))
-          ]);
+          Math.sin(deg2rad(beta)) * Math.cos(deg2rad(gamma)),
+          Math.sin(deg2rad(beta)) * Math.sin(deg2rad(gamma)),
+          Math.cos(deg2rad(beta))
+          ]);;
           const cos_theta_i = Math.max(0, dot(nn, sv));
 
           // Radiación sobre panel inclinado (directa + difusa + reflejada)

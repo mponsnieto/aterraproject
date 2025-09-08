@@ -723,6 +723,8 @@ function agruparEnergiaPorMes(fecha_inicio, fecha_fin, day_interval, E_paneles_d
   if (E_paneles_dias.length !== dias.length) {
     console.warn("Longitudes no coinciden: E_paneles_dias vs dias simulados.",
                  E_paneles_dias.length, dias.length);
+  }else{
+    console.log("agrupardiaMEs",dias, pesos);
   }
   const byMonth = {}; // { 'YYYY-MM': kWh }
 

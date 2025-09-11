@@ -81,13 +81,13 @@
     <div style="flex: 1; min-width: 250px;">
       <h3>Ubicación</h3>
       <label>Superficie disponible (ha):</label>
-      <input type="number" id="area" placeholder="Ej: 1000" value="1000">
+      <input type="number" id="area" placeholder="Ej: 4" value="0.28">
       <label>Malla (10-250):</label>
       <input type="number" id="resolucion_malla" placeholder="Ej: 100" value="50">
 
       <label>Coordenadas (latitud, longitud):</label>
-      <input type="number" id="latitud" placeholder="Ej: 1000" value="39.02">
-      <input type="number" id="longitud" placeholder="Ej: 1000" value="1.45">
+      <input type="number" id="latitud" placeholder="Ej: 1000" value="39.56939">
+      <input type="number" id="longitud" placeholder="Ej: 1000" value="2.65024">
 
       <label>Albedo (0-1):</label>
       <input type="number" id="albedo" placeholder="Ej: 0.3" value="0.3">
@@ -101,6 +101,8 @@
       <label>Tipo de cultivo:</label>
       <select id="crop">
         <option value="lechuga">Lechuga</option>
+        <option value="tomate">Tomate</option>  
+        <option value="calabacin">Calabacin</option>  
         <option value="patata">Patata</option>        
         <option value="pimiento">Pimiento</option>
         <option value="fresa">Fresa</option>
@@ -116,6 +118,8 @@
         <option value="hotel_2">4 estrellas</option>
         <option value="hotel_3">Agroturismo</option>
       </select>
+      <label>Demanda del alimento en el periodo (pe: kg/año):</label>
+      <input type="number" id="foodDemand" placeholder="Ej: 22500" value="22500">
       <label>Precio venta energía (€/kWh):</label>
       <input type="number" id="price" placeholder="Ej: 0.12" value="0.12">
 
@@ -139,35 +143,35 @@
     <div style="flex: 1; min-width: 250px;">
       <h3>Datos de Energía</h3>
       <label>Num columnas placas (módulos por string):</label>
-      <input type="number" id="nCols" placeholder="Ej: 2" value="2">
+      <input type="number" id="nCols" placeholder="Ej: 2" value="57">
 
       <label>Separación entre columnas (m):</label>
       <input type="number" id="sepX" placeholder="Ej: 3" value="0.1">
 
       <label>Num filas placas (número de strings):</label>
-      <input type="number" id="nFilas" placeholder="Ej: 3" value="4">
+      <input type="number" id="nFilas" placeholder="Ej: 3" value="5">
 
       <label>Separación entre filas (m):</label>
-      <input type="number" id="sepY" placeholder="Ej: 3" value="1">
+      <input type="number" id="sepY" placeholder="Ej: 3" value="5">
 
       <label>Transparencia paneles (%):</label>
-      <input type="number" id="tau_dir" placeholder="Ej: 0.6" value="0.6">
+      <input type="number" id="tau_dir" placeholder="Ej: 0.6" value="0">
 
       <label>Eficiencia del sistema (%):</label>
-      <input type="number" id="efficiency" placeholder="Ej: 18" value="22">
+      <input type="number" id="efficiency" placeholder="Ej: 18" value="22.6">
 
       <label>Dimensiones del panel: Alto, ancho (m):</label>
-      <input type="number" id="panelH" placeholder="Alto. Ej: 2.2" value="2.2">
-      <input type="number" id="panelW" placeholder="Ancho. Ej: 0.8" value="0.8">
+      <input type="number" id="panelH" placeholder="Alto. Ej: 2.2" value="4.764">
+      <input type="number" id="panelW" placeholder="Ancho. Ej: 0.8" value="1.134">
 
       <label>Elevación de los paneles (m):</label>
       <input type="number" id="h_pv" placeholder="Ej: 4" value="4">
 
       <label>Inclinación de los paneles - beta (º):</label>
-      <input type="number" id="inclinacion" placeholder="Ej: 4" value="35">
+      <input type="number" id="inclinacion" placeholder="Ej: 4" value="30">
 
       <label>Azimut (º):</label>
-      <input type="number" id="gamma" placeholder="Ej: 180º SUR" value="180">
+      <input type="number" id="gamma" placeholder="Ej: 180º SUR" value="189">
 
     </div>
   </div>

@@ -5,7 +5,7 @@ function runSimulacionRadiacion(datos, paneles){
  //Realiza toda la simulación de radiación solar y devuelve resultados estructurados
  // === Parámetros de entrada ===
 	const {
-    fecha_inicio, fecha_fin,latitud, longitud, nFilas, nCols, margen, day_interval,
+    fecha_inicio, fecha_fin,latitud, longitud, nFilas, nCols, margen, day_interval,efficiency,
     inclinacion, orientacion: gamma, albedo, malla, G0, tau_dir, f_gap,k_t, fd, sepY, sepX
   	} = datos;
 	
@@ -144,7 +144,7 @@ function runSimulacionRadiacion(datos, paneles){
         const I_dif_pv = DHI_pv;
         const I_ref_pv = albedo * GHI * (1 + Math.cos(deg2rad(beta))) / 2;
         const I_total_pv = I_dir_pv + I_dif_pv + I_ref_pv;
-        E_por_panel[p] += I_total_pv * A_panel * dt / 3600 / 1000;  // kWh
+        E_por_panel[p] += efficiency*I_total_pv * A_panel * dt / 3600 / 1000;  // kWh
         //console.log("I_dir_pv",I_dir_pv,"E panel 1:", E_por_panel);
       }
     }

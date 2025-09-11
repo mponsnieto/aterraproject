@@ -10,7 +10,7 @@ async function runSimulacionRadiacionConDatosReales (datos, paneles){
      //Realiza toda la simulación de radiación solar y devuelve resultados estructurados
      // === Parámetros de entrada ===
       const {
-        fecha_inicio, fecha_fin,latitud, longitud, nFilas, nCols, margen, day_interval,
+        fecha_inicio, fecha_fin,latitud, longitud, nFilas, nCols, margen, day_interval,efficiency,
         inclinacion, orientacion: gamma, albedo, malla, G0, tau_dir, f_gap,k_t, fd, sepY, sepX
         } = datos;
       
@@ -182,7 +182,7 @@ async function runSimulacionRadiacionConDatosReales (datos, paneles){
             let I_total_pv = Math.max(0, DNI_pv) + Math.max(0, DHI_pv) + Math.max(0, I_ref_pv);
             if (!Number.isFinite(I_total_pv)) I_total_pv = 0;
 
-            E_por_panel[p] += I_total_pv * areaPanel * (dt / 3600) / 1000; // kWh por panel
+            E_por_panel[p] += efficiency*I_total_pv * areaPanel * (dt / 3600) / 1000; // kWh por panel
           }
         } // fin lazo horario
         console.log(E_accum,E_por_panel);

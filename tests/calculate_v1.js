@@ -92,6 +92,7 @@ async function calculate() {
   k_t,
   fd,
   malla,
+  efficiency,
   area: parseFloat(document.getElementById('area').value),
   orientacion: parseFloat(document.getElementById("gamma").value)
   };

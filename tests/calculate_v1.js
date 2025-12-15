@@ -1,5 +1,9 @@
 let chart = null;
 async function calculate() {
+  if (typeof disableHelp === "function") {
+      disableHelp();
+    }
+  
   //Datos de simulacion
   const fecha_inicio = new Date(document.getElementById('fecha_inicio').value);
   const fecha_fin = new Date(document.getElementById('fecha_fin').value);

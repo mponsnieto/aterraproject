@@ -1,3 +1,5 @@
+let HELP_ENABLED = true;
+
 const HELP = {
   area: {
     name: "Available area (m²)",
@@ -98,11 +100,24 @@ const HELP = {
 
 // --- Panel controls ---
 function openHelp(key){
+  if (!HELP_ENABLED) return;
+
   const item = HELP[key] || { name: key, desc: "No description available.", meta: "" };
   document.getElementById("helpParamName").textContent = item.name || key;
   document.getElementById("helpParamDesc").textContent = item.desc || "";
   document.getElementById("helpParamMeta").textContent = item.meta || "";
   document.getElementById("helpOverlay").style.display = "flex";
+}
+
+function disableHelp(){
+  HELP_ENABLED = false;
+
+  // Cerrar panel si está abierto
+  const overlay = document.getElementById("helpOverlay");
+  if (overlay) overlay.style.display = "none";
+
+  // Eliminar iconos ⓘ del DOM
+  document.querySelectorAll(".help-icon").forEach(icon => icon.remove());
 }
 
 function closeHelp(){

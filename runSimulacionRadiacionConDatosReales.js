@@ -1,4 +1,7 @@
 async function runSimulacionRadiacionConDatosReales (datos, paneles){
+  if (typeof disableHelp === "function") {
+      disableHelp();
+  }
   const btns = Array.from(document.querySelectorAll('button'));
   try {
     showLoader("Calculando simulación…");

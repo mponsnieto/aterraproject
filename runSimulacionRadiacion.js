@@ -4,6 +4,7 @@ async function runSimulacionRadiacion(datos, paneles){
   try {
     showLoader("Calculando simulación…");
     btns.forEach(b => b.disabled = true);
+    await yieldToUI();
 
      const container = document.getElementById("visualRadiacion");
       container.innerHTML = ""; // Limpiar si ya existe
@@ -56,10 +57,14 @@ async function runSimulacionRadiacion(datos, paneles){
       console.error("❌ la fecha de inicio no puede ser posterior a la final", paneles);
       return;
     }
+    let iterDia = 0;
 
     while (dia <= end) {
-      showLoader("Calculando…");
-      console.log("dia:", dia);
+      if (iterDia % 1 === 0) {
+        showLoader(`Calculando… (día ${iterDia + 1})`);
+        await yieldToUI();
+      }
+
       const dt = 900; // segundos (15 min)
       const times = generateTimeSeries(dia, 4, 22, dt);
       const n = getDayOfYear(dia);
@@ -166,6 +171,7 @@ async function runSimulacionRadiacion(datos, paneles){
     E_por_panel_dias.push(E_por_panel);
 
     dia.setDate(dia.getDate() + day_interval);
+    iterDia++;
    
     }
 
@@ -778,4 +784,8 @@ function hideLoader() {
   if (!ov) return;
   ov.style.display = "none";
   document.body.style.overflow = "";
+}
+
+function yieldToUI() {
+  return new Promise(requestAnimationFrame);
 }

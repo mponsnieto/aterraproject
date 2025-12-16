@@ -2,24 +2,24 @@ let HELP_ENABLED = true;
 
 const HELP = {
   area: {
-    name: "Available area (m²)",
-    desc: "Total available ground area for the agrivoltaic layout.\nUsed to contextualize spacing and results.",
-    meta: "Typical: 500–50,000 m²"
+    name: "Superficie disponible (ha)",
+    desc: "Extensión del terreno cultivable sobre el que se instalarán los paneles. El simulador acepta una superficie disponible mayor que la ocupada por la zona agrovoltaica, aunque eso incrementa el tiempo de simulación.",
+    meta: "Típico: 0.5, 2 – 7 ha"
   },
   latitud: {
-    name: "Latitude (°)",
-    desc: "Site latitude in decimal degrees.\nAffects sun position and seasonal irradiance.",
-    meta: "Ibiza approx.: 38.9–39.1°"
-  },
-  longitud: {
-    name: "Longitude (°)",
-    desc: "Site longitude in decimal degrees.\nUsed together with latitude for solar geometry.",
-    meta: "Ibiza approx.: 1.2–1.6°E"
+    name: "Latitud y longitud(°)",
+    desc: "Coordenadas en grados de la localización del proyecto. \nCabe mencionar que el simulador está diseñado para proyectos en Baleares.",
+    meta: "Ejemplo: Ibiza 38.9743901° – 1.41974631785153°"
   },
   albedo: {
     name: "Albedo (0–1)",
-    desc: "Fraction of global horizontal irradiance reflected by the ground.\nUsed for reflected component on panels and terrain.",
+    desc: "El albedo refleja la capacidad del terreno para devolver parte de la radiación solar que recibe. No es un valor fijo, oscila entre 0 y 1: cambia con la estación del año y con la superficie presente, como tierra, roca o vegetación. En general, los suelos claros reflejan más energía que los oscuros, lo que influye directamente en el rendimiento del sistema agrovoltaico. \nComo referencia en el contexto balear, la hierba suele situarse entre 0,15 y 0,25; la tierra clara o seca alrededor de 0,20–0,30; mientras que un olivar o viñedo con suelo descubierto puede acercarse a 0,25–0,35.",
     meta: "Typical: 0.15–0.35"
+  },
+  resolucion_malla:{
+    name: "Resolucion Malla (uds)",
+    desc: "Número de divisiones usadas para discretizar el terreno en una malla regular sobre la que calcular la irradianza y sombras.\nValores más elevados implican mayor resolución sobre el terreno y precisión, pero también implican un alto coste computacional (tiempo).",
+    meta: "Typical: 10, 50, 100"
   },
   G0: {
     name: "Solar constant (W/m²)",
@@ -40,6 +40,16 @@ const HELP = {
     name: "Day interval",
     desc: "Time step (in days) used to sample days within the simulation period.\nHigher values reduce computation time but lower temporal resolution.",
     meta: "Typical: 1–10"
+  },
+  hotel: {
+    name: "Categoría del hotel",
+    desc: "Este dato permitirá comparar la producción energética y el consumo del cultivo con los parámetros medios para un establecimiento de la misma tipología.",
+    meta: "Si se especifican los campos de demanda de alimento y energía, este campo no es relevante."
+  },
+  foodDemand: {
+    name: "Demanda del cultivo seleccionado para un hotel concreto (kg/año)",
+    desc: "Este dato permitirá comparar la producción energética y el consumo del cultivo con los parámetros medios para un establecimiento de la misma tipología.",
+    meta: "Si se especifican los campos de demanda de alimento y energía, este campo no es relevante."
   },
   nFilas: {
     name: "Number of PV rows",
@@ -62,19 +72,14 @@ const HELP = {
     meta: "Typical: 1–10 m"
   },
   panelW: {
-    name: "Panel width (m)",
-    desc: "Panel dimension across the short side (width).",
+    name: "Dimensiones del panel: alto y ancho (m)",
+    desc: "Dimensiones de un panel fotovoltaico. Estos valores aparecen especificados en la ficha técnica del fabricante y determinan la superficie ocupada por cada módulo en la instalación.",
     meta: "Example: 0.8–1.2 m"
   },
-  panelH: {
-    name: "Panel height/length (m)",
-    desc: "Panel dimension along the long side (length).",
-    meta: "Example: 1.6–2.4 m"
-  },
   h_pv: {
-    name: "Panel elevation (m)",
+    name: "Elevación de los paneles (m)",
     desc: "Height of the panel structure above ground.\nAffects shading footprint and agricultural machinery clearance.",
-    meta: "Typical: 2–5 m"
+    meta: "Tipico: 2–5 m"
   },
   inclinacion: {
     name: "Tilt angle β (°)",
@@ -86,15 +91,34 @@ const HELP = {
     desc: "Panel orientation azimuth.\n180° typically corresponds to South-facing in many conventions.",
     meta: "Common: 180° (South)"
   },
+  tau_dir: {
+    name: "Transparencia del panel (%)",
+    desc: "porcentaje de radiación solar que atraviesa los paneles y llega al cultivo. Un mayor nivel de transparencia permite que la planta reciba más luz, aunque disminuye la producción eléctrica; con menor transparencia ocurre lo contrario. No existe un valor estándar, ya que depende del diseño y del fabricante.",
+    meta: "Rango: 0% (opaco) - 100% (transparente)"
+  },
   crop: {
-    name: "Crop type",
-    desc: "Crop selection used to estimate yield response under shading (RSR).",
-    meta: "Examples: lettuce, tomato, zucchini"
+    name: "Tipo de cultivo",
+    desc: `La investigación del proyecto ATERRA se centra en los cultivos seleccionados, permitiendo analizar el resultado de cultivos con una tolerancia alta, media y baja a la sombra. 
+    Para más información: <a href="https://clusterteib.es/rendimientos-agricolas/"
+       target="_blank" rel="noopener"> click aquí
+    </a>
+    `
+    ,
+    meta: "Categorías: lechuga, tomate, sandía"
+  },
+  yieldBase: {
+    name: "Rendimiento del cultivo base (kg/ha)",
+    desc: `
+    Rendimiento del cultivo en condiciones normales y cielo abierto. Si conoce el rendimiento de su terreno y cultivo puede introducirlo. Sino puede consultar valores estandar para Baleares en: <a href="https://clusterteib.es/rendimientos-agricolas/"
+       target="_blank" rel="noopener"> click aquí
+    </a>
+    `,
+    meta: "Typical: lettuce, tomato, zucchini"
   },
   weather: {
-    name: "Climate model",
-    desc: "PVGIS uses real climatological datasets.\nStandard uses a simplified theoretical climate model.",
-    meta: "PVGIS is slower but more data-driven."
+    name: "Modelo de clima",
+    desc: "El modelo de clima define la metodología por la que se calcula la irradiancia en ese terreno. En el modelo teórico se aplican fórmulas matemáticas simplificadas (modelo teórico) y en el modelo basado en PVGIS se emplean datos reales de irradiancia.",
+    meta: "PVGIS es más lento pero se basa en datos actualizados."
   }
 };
 
@@ -104,9 +128,10 @@ function openHelp(key){
 
   const item = HELP[key] || { name: key, desc: "No description available.", meta: "" };
   document.getElementById("helpParamName").textContent = item.name || key;
-  document.getElementById("helpParamDesc").textContent = item.desc || "";
+  document.getElementById("helpParamDesc").innerHTML = item.desc || "";
   document.getElementById("helpParamMeta").textContent = item.meta || "";
   document.getElementById("helpOverlay").style.display = "flex";
+
 }
 
 

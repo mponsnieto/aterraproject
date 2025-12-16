@@ -1,6 +1,9 @@
 let chart = null;
 async function calculate() {
+  showLoader("Calculando…");
   if (typeof window.disableHelp === "function") window.disableHelp();
+  await new Promise(requestAnimationFrame);
+
   //Datos de simulacion
   const fecha_inicio = new Date(document.getElementById('fecha_inicio').value);
   const fecha_fin = new Date(document.getElementById('fecha_fin').value);
@@ -103,7 +106,7 @@ async function calculate() {
 
   let energia;
   if (weather === "teorico") {
-    energia = runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacion.js
+    energia = await runSimulacionRadiacion(datosVisual,paneles);  // Función de runSimulacionRadiacion.js
     console.log("----Resultados----", energia);
     console.log("----E_terreno_total----", energia.E_terreno_total);
   } else if (weather === "pvgis") {
@@ -120,7 +123,7 @@ async function calculate() {
   document.getElementById('production').textContent = energia.E_paneles_total.toFixed(2);
   document.getElementById('revenue').textContent = revenue.toFixed(2);
   document.getElementById('results').style.display = 'block';
-
+  hideLoader();
   if (chart) chart.destroy();
   const ctx = document.getElementById('resultsChart').getContext('2d');
   chart = new Chart(ctx, {
@@ -147,4 +150,21 @@ let cropName = crop.charAt(0).toUpperCase() + crop.slice(1);
 document.getElementById('cropProductionResult').textContent = `${resultados.cropProduction.toFixed(0)} kg de ${cropName} en ${resultados.area_Agri.toFixed(2)} m²`;
 
 document.getElementById('cropProductionFree').textContent = `${resultados.cropProduction_free.toFixed(0)} kg de ${cropName} en ${resultados.area_noAgri.toFixed(2)} m²`;
+}
+
+function showLoader(msg = "Calculando…") {
+  const ov = document.getElementById("loaderOverlay");
+  if (!ov) return;
+  const t = ov.querySelector(".loader-text");
+  if (t) t.textContent = msg;
+  ov.style.display = "flex";
+  // opcional: bloquear scroll
+  document.body.style.overflow = "hidden";
+}
+
+function hideLoader() {
+  const ov = document.getElementById("loaderOverlay");
+  if (!ov) return;
+  ov.style.display = "none";
+  document.body.style.overflow = "";
 }

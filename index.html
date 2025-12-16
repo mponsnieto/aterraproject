@@ -64,6 +64,20 @@
       <label>Albedo (0-1):</label>
       <input type="number" id="albedo" placeholder="Ej: 0.3" value="0.3">
 
+      <h3>Datos de la simulación</h3>
+      <label>Modelo de clima:</label>
+      <select id="weather">
+        <option value="teorico">Teorico</option>  
+        <option value="pvgis">PVGIS</option>
+      </select>
+      <label>Fecha inicio simulación:</label>
+      <input type="date" id="fecha_inicio" value="2024-01-01">
+
+      <label>Fecha fin simulación:</label>
+      <input type="date" id="fecha_fin" value="2024-12-31">
+      <label>Intervalo de días (num):</label>
+      <input type="number" id="day_interval" placeholder="Ej: 10" value="10">
+
       </div>
 
       <!-- Columna Energía -->
@@ -84,7 +98,12 @@
       <input type="number" id="yieldBase" placeholder="Ej: 22500" value="22500">
 
       <h3>Datos del consumidor turístico</h3>
-      <label>Tipo de hotel:</label>
+      <label>Precio alimento (€/kg):</label>
+      <input type="number" id="priceFood" placeholder="Ej: 0.12" value="0.12">
+      <label>Precio energía (€/kWh):</label>
+      <input type="number" id="price" placeholder="Ej: 0.12" value="0.12">
+      <h5>Modificar en caso de querer un escenario standar</h5>
+      <label>Categoría de hotel:</label>
       <select id="hotel">
         <option value="hotel_1">5 estrellas</option>
         <option value="hotel_2">4 estrellas</option>
@@ -92,24 +111,16 @@
         <option value="hotel_4">2 estrellas</option>
         <option value="hotel_5">1 estrella</option>
       </select>
-      <label>Demanda del alimento en el periodo (pe: kg/año):</label>
+      <label>Número de plazas:</label>
+      <input type="number" id="plazasTuristicas" placeholder="Ej: 5000" value="5000">
+      <h5>Si se modifican los siguientes campos, el simulador no usará los dos anteriores</h5>
+      <label>Demanda de alimento (kg):</label>
       <input type="number" id="foodDemand" placeholder="Ej: 22500" value="22500">
-      <label>Precio venta energía (€/kWh):</label>
-      <input type="number" id="price" placeholder="Ej: 0.12" value="0.12">
+      <label>Demanda de energía (kWh):</label>
+      <input type="number" id="energyDemand" placeholder="Ej: 230700" value="230700">
+      
 
-      <h3>Datos de la simulación</h3>
-      <label>Modelo de clima:</label>
-      <select id="weather">
-        <option value="teorico">Teorico</option>  
-        <option value="pvgis">PVGIS</option>
-      </select>
-      <label>Fecha inicio simulación:</label>
-      <input type="date" id="fecha_inicio" value="2024-01-01">
-
-      <label>Fecha fin simulación:</label>
-      <input type="date" id="fecha_fin" value="2024-12-31">
-      <label>Intervalo de días (num):</label>
-      <input type="number" id="day_interval" placeholder="Ej: 10" value="10">
+      
       
     </div>
 

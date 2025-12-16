@@ -47,7 +47,7 @@ const HELP = {
     meta: "Si se especifican los campos de demanda de alimento y energía, este campo no es relevante."
   },
   foodDemand: {
-    name: "Demanda del cultivo seleccionado para un hotel concreto (kg/año)",
+    name: "Demanda del cultivo seleccionado para un hotel concreto (kg)",
     desc: "Este dato permitirá comparar la producción energética y el consumo del cultivo con los parámetros medios para un establecimiento de la misma tipología.",
     meta: "Si se especifican los campos de demanda de alimento y energía, este campo no es relevante."
   },

@@ -1,9 +1,6 @@
 let chart = null;
 async function calculate() {
-  if (typeof disableHelp === "function") {
-      disableHelp();
-    }
-  
+  if (typeof window.disableHelp === "function") window.disableHelp();
   //Datos de simulacion
   const fecha_inicio = new Date(document.getElementById('fecha_inicio').value);
   const fecha_fin = new Date(document.getElementById('fecha_fin').value);
@@ -28,7 +25,7 @@ async function calculate() {
   const sepY = parseFloat(document.getElementById('sepY').value); // % Distancia entre filas de paneles (m)  
   const margen = 0.5; // % margen del terreno a los cuatro lados del arreglo de pv (m)
   const panelW = parseFloat(document.getElementById('panelW').value); // % Dimensión horizontal del panel (de lado a lado) (m)
-  const panelL = parseFloat(document.getElementById('panelH').value); // % Dimensión vertical del panel (desde base a vértice superior) (m) 
+  const panelH = parseFloat(document.getElementById('panelH').value); // % Dimensión vertical del panel (desde base a vértice superior) (m) 
   const h_pv = parseFloat(document.getElementById('h_pv').value); // Altura desde el suelo hasta el borde inferior del panel (m) 
   const inclinacion = parseFloat(document.getElementById('inclinacion').value); //% Ángulo entre el panel y la horizontal, en grados (0° = horizontal, 90° = vertical)
   const orientacion = parseFloat(document.getElementById('gamma').value); // % Ángulo de orientación del panel (180° = sur, 90° = este, 270° = oeste, 0° = norte)

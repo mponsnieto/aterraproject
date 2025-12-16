@@ -1,7 +1,5 @@
 function runSimulacionRadiacion(datos, paneles){
-  if (typeof disableHelp === "function") {
-      disableHelp();
-  }
+  if (typeof window.disableHelp === "function") window.disableHelp();
   const container = document.getElementById("visualRadiacion");
   container.innerHTML = ""; // Limpiar si ya existe
 

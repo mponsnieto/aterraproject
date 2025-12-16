@@ -1,4 +1,6 @@
 function mostrarVisualizacion3D(datos) {
+  if (typeof window.disableHelp === "function") window.disableHelp();
+  
   const container = document.getElementById("visualizacion3D");
   container.innerHTML = ""; // Limpiar si ya existe
 

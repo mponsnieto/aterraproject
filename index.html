@@ -2,9 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <style>
+  body {font-family: Montserrat, serif;}
+  </style>
   <title>Simulador Proyectos Agrivoltaica - Proyecto ATERRA</title>
   <link rel="stylesheet" href="stylesAterra.css">
-  
+  <script src="help.js" defer></script>
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,22 +16,24 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
-<!-- Panel de ayuda (overlay) -->
-<div id="helpOverlay" class="help-overlay" style="display:none;">
-  <div class="help-panel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-    <div class="help-header">
-      <h3 id="helpTitle">Parameter help</h3>
-      <button type="button" class="help-close" id="helpCloseBtn">✕</button>
-    </div>
-    <div class="help-body">
-      <h4 id="helpParamName" style="margin-top:0;"></h4>
-      <p id="helpParamDesc" style="white-space:pre-line;"></p>
-      <div id="helpParamMeta" class="help-meta"></div>
+<body>
+
+  <!-- Panel de ayuda (overlay) -->
+  <div id="helpOverlay" class="help-overlay" style="display:none;">
+    <div class="help-panel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="help-header">
+        <h3 id="helpTitle">Parameter help</h3>
+        <button type="button" class="help-close" id="helpCloseBtn">✕</button>
+      </div>
+      <div class="help-body">
+        <h4 id="helpParamName" style="margin-top:0;"></h4>
+        <p id="helpParamDesc" style="white-space:pre-line;"></p>
+        <div id="helpParamMeta" class="help-meta"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<body>
+
 
   <h1>Simulador Proyectos Agrivoltaica - Proyecto ATERRA</h1>
   <div style="display: flex; justify-content: center; gap: 200px; align-items: center; margin-bottom: 20px;">
@@ -143,7 +148,7 @@
     </div>
   </div>
 
-    <script src="help.js"></script>
+
 
     <button onclick="calculate()">Calcular</button>
     <button onclick="downloadPDF()" style="background:#007BFF;">Descargar PDF</button>

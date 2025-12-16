@@ -109,16 +109,25 @@ function openHelp(key){
   document.getElementById("helpOverlay").style.display = "flex";
 }
 
-function disableHelp(){
+
+function disableHelp() {
   HELP_ENABLED = false;
 
-  // Cerrar panel si está abierto
+  const icons = document.querySelectorAll(".help-icon");
+  const dataHelp = document.querySelectorAll("[data-help]");
+
+  console.log("disableHelp() CALLED");
+  console.log("Found .help-icon:", icons.length, "Found [data-help]:", dataHelp.length);
+
+  document.querySelectorAll(".help-icon, [data-help]").forEach(el => el.remove());
+
+  console.log("After remove .help-icon:", document.querySelectorAll(".help-icon").length);
+
   const overlay = document.getElementById("helpOverlay");
   if (overlay) overlay.style.display = "none";
-
-  // Eliminar iconos ⓘ del DOM
-  document.querySelectorAll(".help-icon").forEach(icon => icon.remove());
 }
+window.disableHelp = disableHelp;
+
 
 function closeHelp(){
   document.getElementById("helpOverlay").style.display = "none";
@@ -126,6 +135,7 @@ function closeHelp(){
 
 // --- Inject ⓘ icons next to labels based on input/select id ---
 function attachHelpIcons(){
+  if (!HELP_ENABLED) return;
   // For each input/select with an id, try to find the previous label and add the icon
   const controls = document.querySelectorAll("input[id], select[id]");
   controls.forEach(ctrl => {
@@ -143,7 +153,7 @@ function attachHelpIcons(){
 
     const icon = document.createElement("span");
     icon.className = "help-icon";
-    icon.textContent = "i";
+    icon.textContent = "?";
     icon.setAttribute("title", "More info");
     icon.setAttribute("role", "button");
     icon.setAttribute("tabindex", "0");
@@ -168,3 +178,7 @@ function attachHelpIcons(){
 }
 
 document.addEventListener("DOMContentLoaded", attachHelpIcons);
+
+window.disableHelp = disableHelp;
+window.openHelp = openHelp;   
+window.closeHelp = closeHelp; 

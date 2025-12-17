@@ -475,163 +475,6 @@ function renderEnergiaPorMes(labels, values){
   });
 }
 
-/*function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
-  console.log("--------E_terreno_total---",E_terreno_total)
-  const canvas = document.createElement("canvas");
-    
-  const padding = 50; // espacio para etiquetas
-  const scale = 4;
-  //const width = xgv.length * scale + padding*2;
-  //const height = ygv.length * scale + padding;
-  const width_legend = 30;
-
-  canvas.width = width+(width_legend*2);
-  canvas.height = height;
-
-  const ctx = canvas.getContext("2d");
-  ctx.innerHTML = ""; // Limpiar si ya existe
-  const nRows = ygv.length;
-  const nCols = xgv.length;
-
-  const minVal = Math.ceil(Math.min(...E_terreno_total.flat()));
-  const maxVal = Math.ceil(Math.max(...E_terreno_total.flat()));
-  console.log("E_terreno_total", E_terreno_total,"minVal",minVal,"maxVal",maxVal)
-  const getColor = (v) => {
-    const ratio = (v - minVal) / (maxVal - minVal);
-    const r = Math.floor(255 * ratio);
-    const g = Math.floor(255 * ratio);
-    const b = Math.floor(255 * (1 - ratio)); //Valor más bajo
-    return `rgb(${r},${g},${b})`;
-  };
-
-
-  // Dibujar heatmap
-  const xMin = xgv[0];
-  const xMax = xgv[xgv.length - 1];
-  const yMin = ygv[0];
-  const yMax = ygv[ygv.length - 1];
-
-  const Lx = xMax - xMin; // metros
-  const Ly = yMax - yMin; // metros
-  const pxPerMeter = 25; // ajustable
-  const mapWidth  = Lx * pxPerMeter;
-  const mapHeight = Ly * pxPerMeter;
-
-  const width  = mapWidth  + padding * 2;
-  const height = mapHeight + padding;
-
-  for (let i = 0; i < nCols; i++) {
-    for (let j = 0; j < nRows; j++) {
-      const val = E_terreno_total[j][i];
-      ctx.fillStyle = getColor(val);
-      const y = (nRows - j - 1) * scale;
-      //ctx.fillRect(padding + i * scale, y, scale, scale);
-      const dx = (xgv[1] - xgv[0]) * pxPerMeter;
-      const dy = (ygv[1] - ygv[0]) * pxPerMeter;
-
-      const xPix = padding + (xgv[i] - xMin) * pxPerMeter;
-      const yPix = (mapHeight - (ygv[j] - yMin) * pxPerMeter);
-
-      ctx.fillRect(xPix, yPix, dx, dy);
-    }
-  }
-
-  // Dibujar paneles
-  ctx.fillStyle = "rgba(180,180,255,0.6)";
-  ctx.strokeStyle = "black";
-  for (const p of paneles) {
-    const xs = [p.PL[0], p.PR[0], p.TL[0], p.TR[0]];
-    const ys = [p.PL[1], p.PR[1], p.TL[1], p.TR[1]];
-
-    const xMin = Math.min(...xs);
-    const xMax = Math.max(...xs);
-    const yMin = Math.min(...ys);
-    const yMax = Math.max(...ys);
-
-    const xIdx = xgv.findIndex(val => val >= xMin);
-    const yIdx = ygv.findIndex(val => val >= yMin);
-    const w = Math.round((xMax - xMin) / (xgv[1] - xgv[0]));
-    const h = Math.round((yMax - yMin) / (ygv[1] - ygv[0]));
-
-    ctx.fillRect(padding + xIdx * scale, (nRows - yIdx - h) * scale, w * scale, h * scale);
-    ctx.strokeRect(padding + xIdx * scale, (nRows - yIdx - h) * scale, w * scale, h * scale);
-  }
-
-  // Etiquetas del eje Y
-  ctx.save();
-  ctx.fillStyle = "black";
-  ctx.translate(15, (ygv.length * scale) / 2);
-  ctx.rotate(-Math.PI / 2);
-  ctx.textAlign = "center";
-  ctx.fillText("Y (m)", 0, 0);
-  ctx.restore();
-
-  ctx.fillStyle = "black";
-  ctx.textAlign = "right";
-  ctx.textBaseline = "middle";
-  for (let j = nRows-1; j > 0; j -= 5) {
-    const y = (nRows - j) * scale + scale / 2;
-    ctx.fillText(ygv[j].toFixed(1), padding-5 , y);
-  }
-
-  // Etiquetas del eje X
-  ctx.textAlign = "center";
-  ctx.fillStyle = "black";
-
-  ctx.fillText("X (m)", padding + (xgv.length * scale) / 2, height - 10);
-  ctx.textAlign = "center";
-  ctx.textBaseline = "top";
-  for (let i = nCols-1; i>0; i-=5){//0; i < nCols; i += 5) {
-    ctx.fillText(xgv[i].toFixed(1), padding + i * scale + scale / 2, height - padding + 5);
-  }
-
-  // Ejes
-  ctx.beginPath();
-  ctx.moveTo(padding, 0);
-  ctx.lineTo(padding, nRows * scale);
-  ctx.moveTo(padding, nRows * scale);
-  ctx.lineTo(width, nRows * scale);
-  ctx.stroke();
-
-  // Leyenda vertical
-  const legendHeight = height - padding-15;
-  const legendX = width - width_legend;
-  const legendY = 5;//Primer punto de la leyenda
-  const gradient = ctx.createLinearGradient(0, legendY, 0, legendHeight);
-  gradient.addColorStop(0, getColor(maxVal));
-  gradient.addColorStop(1, getColor(minVal));
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(legendX, legendY, 20, legendHeight);
-
-  ctx.strokeStyle = "black";
-  ctx.strokeRect(legendX, legendY,20, legendHeight);
-
-  ctx.fillStyle = "black";
-  ctx.textAlign = "left";
-  ctx.textBaseline = "middle";
-  
-  const nTicks = 5; // Número total de marcas (incluye min y max)
-  for (let i = 0; i < nTicks; i++) {
-    const t = i / (nTicks - 1);
-    const y = legendY + t * legendHeight;
-    const val = maxVal - t * (maxVal - minVal);
-
-    ctx.fillText(val.toFixed(1), legendX + width_legend, y);
-  }
-
-  // Añadir a la página
-  const container = document.getElementById("visualRadiacion");
-  container.innerHTML = "";
-
-  const titulo = document.createElement("h3");
-  titulo.textContent = "Energía acumulada en el terreno (kWh/m²)";
-  titulo.style.textAlign = "center";
-  titulo.style.marginBottom = "10px";
-  container.appendChild(titulo);
-
-  container.appendChild(canvas);
-}*/
 
 function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles) {
    console.log(">>> NUEVA mostrarMapaEnergia ejecutándose (v2)");
@@ -682,7 +525,7 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles) {
   const paddingTop = 10;
 
   // Escala métrica: px por metro (ajustable)
-  const pxPerMeter = 20; // sube si lo quieres más grande
+  const pxPerMeter = 20; 
 
   const mapW = Math.max(1, Lx * pxPerMeter);
   const mapH = Math.max(1, Ly * pxPerMeter);
@@ -854,17 +697,21 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles) {
     ctx.fillText(y_m.toFixed(1), yAxisX - 6, y);
   }
 
-  // --- Leyenda vertical ---
+  // --- Leyenda vertical (muestreando getColor) ---
   const legendX = paddingLeft + mapW + legendGap;
   const legendY = paddingTop;
   const legendH = mapH;
 
-  const grad = ctx.createLinearGradient(0, legendY, 0, legendY + legendH);
-  grad.addColorStop(0, getColor(maxVal));
-  grad.addColorStop(1, getColor(minVal));
+  // pinta la barra en N pasos
+  const steps = 200;
+  for (let s = 0; s < steps; s++) {
+    const t = s / (steps - 1);              // 0..1 (arriba->abajo)
+    const val = maxVal - t * (maxVal - minVal);
+    ctx.fillStyle = getColor(val);
+    const y = legendY + (t * legendH);
+    ctx.fillRect(legendX, y, legendW, legendH / steps + 1);
+  }
 
-  ctx.fillStyle = grad;
-  ctx.fillRect(legendX, legendY, legendW, legendH);
   ctx.strokeStyle = "black";
   ctx.strokeRect(legendX, legendY, legendW, legendH);
 

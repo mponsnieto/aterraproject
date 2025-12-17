@@ -609,19 +609,24 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
   ctx.lineTo(width, nRows * scale);
   ctx.stroke();
 
-  // Leyenda vertical
-  const legendHeight = height - padding-15;
-  const legendX = width - width_legend;
-  const legendY = 5;//Primer punto de la leyenda
-  const gradient = ctx.createLinearGradient(0, legendY, 0, legendHeight);
-  gradient.addColorStop(0, getColor(maxVal));
-  gradient.addColorStop(1, getColor(minVal));
+  // --- Leyenda vertical (muestreando getColor) ---
+  const legendX = paddingLeft + mapW + legendGap;
+  const legendY = paddingTop;
+  const legendH = mapH;
+  const legendW = 20;
 
-  ctx.fillStyle = gradient;
-  ctx.fillRect(legendX, legendY, 20, legendHeight);
+  // pinta la barra en N pasos
+  const steps = 200;
+  for (let s = 0; s < steps; s++) {
+    const t = s / (steps - 1);              // 0..1 (arriba->abajo)
+    const val = maxVal - t * (maxVal - minVal);
+    ctx.fillStyle = getColor(val);
+    const y = legendY + (t * legendH);
+    ctx.fillRect(legendX, y, legendW, legendH / steps + 1);
+  }
 
   ctx.strokeStyle = "black";
-  ctx.strokeRect(legendX, legendY,20, legendHeight);
+  ctx.strokeRect(legendX, legendY, legendW, legendH);
 
   ctx.fillStyle = "black";
   ctx.textAlign = "left";
@@ -1152,6 +1157,7 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles) {
 
   // Añadir canvas (se centrará con tu CSS flex en #visualRadiacion)
   container.appendChild(canvas);
+
 }
 
 function showLoader(msg = "Calculando…") {

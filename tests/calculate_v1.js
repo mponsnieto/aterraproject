@@ -47,11 +47,15 @@ async function calculate() {
 
     //Datos turismo
     const hotel = document.getElementById('hotel').value;
+    const beds = document.getElementById('beds').value;
+    foodDemand = parseFloat(document.getElementById('foodDemand').value);
+    energyDemand = parseFloat(document.getElementById('energyDemand').value);
 
     const coverage = nFilas * nCols * panelW * panelH;
     console.log("coverage",coverage);
     const efficiency = parseFloat(document.getElementById('efficiency').value) / 100;
-    const price = parseFloat(document.getElementById('price').value);
+    const price = parseFloat(document.getElementById('priceEnergy').value);
+    const priceFood = parseFloat(document.getElementById('priceFood').value);
 
     if (isNaN(area) || isNaN(nFilas) || isNaN(efficiency) || isNaN(latitud) || isNaN(longitud)) {
       alert("Por favor, completa todos los campos con valores válidos.");
@@ -62,9 +66,6 @@ async function calculate() {
     const tablaCultivos = parseCSV(read_clasificacion_clutivos());
     // tabla es un array de objetos: [{Cultivo: "Patata", Grupo: "Alta"}, ...]
     
-    // LEER TABLA DE PARÁMETROS YIELD=f(RSR) PARA LOS DIFERENTES GRUPOS
-    const Ecuaciones_CrecimVeg = read_Ecuaciones_CrecimVeg();
-    
     // 2. Buscar el grupo correspondiente al nombre del cultivo
     const idx = tablaCultivos.findIndex(row => row.Cultivo.toLowerCase() === crop);
 
@@ -73,7 +74,10 @@ async function calculate() {
     let coefsGrupo = 0;
     if (idx !== -1) {
       grupo = tablaCultivos[idx].Grupo;
-      console.log(`El cultivo "${crop}" presenta una tolerancia a la sombra "${grupo}".`);
+      if (foodDemand === 0){
+        const demanda_cultivo = tablaCultivos[idx].Demanda;
+        const energiaHotel = CATEGORIAS_ENERGIA[hotel];
+      }
     }
 
     // Mostrar datos introducidos
@@ -141,11 +145,26 @@ async function calculate() {
 
     const powerInstalled = area * coverage * efficiency;
     const productionAnnual = energia.E_paneles_total;
-    const revenue = productionAnnual * price;
+    const revenueEnergy = productionAnnual * price;
+    const revenueFood =priceFood * (resultados.cropProduction.toFixed(0)+resultados.cropProduction_free.toFixed(0));
 
-    document.getElementById('power').textContent = powerInstalled.toFixed(2);
+    if (foodDemand === 0){
+      const demanda_cultivo = tablaCultivos[idx].Demanda;
+      //const tablaHoteles = parseCSV(read_categorias_energia()).findIndex(row => row.Estrellas.toLowerCase() === hotel);
+      const energiaHotel = CATEGORIAS_ENERGIA[hotel];
+      //const energia_hotel = tablaHoteles.Energia; 
+      foodDemand = beds*200*demanda_cultivo;
+      energyDemand = energiaHotel;
+      console.log("energyDemand",energyDemand,hotel);
+    }
+    const portion_food = (resultados.cropProduction.toFixed(0)+resultados.cropProduction_free.toFixed(0))/foodDemand;
+    const portion_energy = productionAnnual/energyDemand*100;
+
+    document.getElementById('portion_food').textContent = portion_food.toFixed(2);
+    document.getElementById('portion_energy').textContent = portion_energy.toFixed(2);
     document.getElementById('production').textContent = energia.E_paneles_total.toFixed(2);
-    document.getElementById('revenue').textContent = revenue.toFixed(2);
+    document.getElementById('revenueEnergy').textContent = revenueEnergy.toFixed(2);
+    document.getElementById('revenueFood').textContent = revenueFood.toFixed(2);
     document.getElementById('results').style.display = 'block';
     hideLoader();
     if (chart) chart.destroy();
@@ -156,7 +175,7 @@ async function calculate() {
         labels: ['Potencia (kWp)', 'Producción (kWh)', 'Ingresos (€)'],
         datasets: [{
           label: 'Resultados',
-          data: [powerInstalled, productionAnnual, revenue],
+          data: [powerInstalled, productionAnnual, revenueEnergy+revenueFood],
           backgroundColor: ['#66bb6a', '#29b6f6', '#ffa726']
         }]
       },
@@ -196,3 +215,12 @@ function hideLoader() {
   ov.style.display = "none";
   document.body.style.overflow = "";
 }
+
+
+const CATEGORIAS_ENERGIA = {
+  hotel_5: 203700,
+  hotel_4: 470000,
+  hotel_3: 1276700,
+  hotel_2: 1914500,
+  hotel_1: 2460900
+};

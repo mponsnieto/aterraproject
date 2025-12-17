@@ -101,9 +101,9 @@
 
       <h3>Datos del consumidor turístico</h3>
       <label>Precio alimento (€/kg):</label>
-      <input type="number" id="priceFood" placeholder="Ej: 0.12" value="0.12">
+      <input type="number" id="priceFood" placeholder="Ej: 0.12" value="1.80">
       <label>Precio energía (€/kWh):</label>
-      <input type="number" id="price" placeholder="Ej: 0.12" value="0.12">
+      <input type="number" id="priceEnergy" placeholder="Ej: 0.12" value="0.12">
       <h5>Modificar para un escenario de hotel standar</h5>
       <label>Categoría de hotel:</label>
       <select id="hotel">
@@ -114,12 +114,12 @@
         <option value="hotel_5">1 estrella</option>
       </select>
       <label>Número de plazas:</label>
-      <input type="number" id="plazasTuristicas" placeholder="Ej: 5000" value="5000">
+      <input type="number" id="beds" placeholder="Ej: 5000" value="5000">
       <h5>Si se modifican los siguientes campos, el simulador no usará los dos anteriores</h5>
       <label>Demanda de alimento (kg):</label>
-      <input type="number" id="foodDemand" placeholder="Ej: 22500" value="22500">
+      <input type="number" id="foodDemand" placeholder="Ej: 22500" value="0">
       <label>Demanda de energía (kWh):</label>
-      <input type="number" id="energyDemand" placeholder="Ej: 230700" value="230700">
+      <input type="number" id="energyDemand" placeholder="Ej: 230700" value="0">
       
 
       
@@ -155,10 +155,10 @@
       <input type="number" id="h_pv" placeholder="Ej: 4" value="4">
 
       <label>Inclinación de los paneles - beta (º):</label>
-      <input type="number" id="inclinacion" placeholder="Ej: 4" value="30">
+      <input type="number" id="inclinacion" placeholder="Ej: 30" value="30">
 
       <label>Azimut (º):</label>
-      <input type="number" id="gamma" placeholder="Ej: 180º SUR" value="189">
+      <input type="number" id="gamma" placeholder="Ej: 180º SUR" value="180">
 
     </div>
   </div>
@@ -190,13 +190,20 @@
     <canvas id="graficoRSR" width="600" height="300" style="margin-top: 30px;"></canvas>
 
     <div class="results" id="results" style="display:none;">
-      <p><strong>Potencia instalada estimada:</strong> <span id="power"></span> kWp</p>
-      <p><strong>Energia producida:</strong> <span id="production"></span> kWh/periodo</p>
-      <p><strong>Ingresos anuales por venta de energía:</strong> <span id="revenue"></span> €</p>
+      <p><h2>Resultados globales</h2> </p>
+      <p><h3>Cultivo</h3> </p>
       <p><strong>Producción bajo superficie agrivoltaica:</strong> <span id="cropProductionResult"></span></p>
       <p><strong>Producción bajo superficie libre (yieldbase):</strong> <span id="cropProductionFree"></span></p>
-      <p><strong>*A tener en cuenta que estos datos no son representativos si no se ha simulado un año natural*</strong></p>
-      <canvas id="resultsChart" width="400" height="200"></canvas>
+      <p><strong>% de demanda anual de alimentos que se podría cubrir:</strong> <span id="portion_food"></span> %</p>
+      <p><strong>Ingresos anuales por venta de cultivo</strong> <span id="revenueFood"></span> €</p>
+
+      <p><h3>Energía</h3> </p>
+      <p><strong>Energia producida:</strong> <span id="production"></span> kWh/periodo</p>
+      <p><strong>% de demanda de energía anual que se podría cubrir:</strong> <span id="portion_energy"></span> %</p>
+      <p><strong>Ingresos anuales por venta de energía:</strong> <span id="revenueEnergy"></span> €</p>
+
+      <p><strong>Nota: </strong> A tener en cuenta que se asume que el cultivo seleccionado se siembra en el momento adecuado. Los datos de cultivo pueden no ser representativos si no se ha simulado un año natural. Para más información consultar: <a href="https://clusterteib.es/recursos-cteib/#informes" target="_blank" rel="noopener"></a> enlace</p>
+      <!--<canvas id="resultsChart" width="400" height="200"></canvas> -->
     </div>
   </div>
 
@@ -218,6 +225,7 @@
   <script src="tests/calculate_v1.js"></script>
   <script src="parameters/clasificacion_cultivos.js"></script>
   <script src="parameters/Ecuaciones_CrecimVeg.js"></script>
+  <script src="parameters/categorias_energia.js"></script>
   <script src="tests/calculate_SRS.js"></script>
   <script src="download.js"></script>
 

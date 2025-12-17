@@ -53,7 +53,7 @@
     <div style="flex: 1; min-width: 250px;">
       <h3>Ubicación</h3>
       <label>Superficie disponible (ha):</label>
-      <input type="number" id="area" placeholder="Ej: 4" value="0.28">
+      <input type="number" id="area" placeholder="Ej: 4" value="0.5">
       <label>Malla (10-250):</label>
       <input type="number" id="resolucion_malla" placeholder="Ej: 100" value="50">
 
@@ -89,7 +89,9 @@
         <option value="lechuga">Lechuga</option>
         <option value="tomate">Tomate</option>  
         <option value="calabacin">Calabacin</option>  
-        <option value="patata">Patata</option>        
+        <option value="patata">Patata</option>
+        <option value="fresa">Sandía</option>
+        <option value="fresa">Berenjena</option>        
         <option value="pimiento">Pimiento</option>
         <option value="fresa">Fresa</option>
       </select>
@@ -127,17 +129,17 @@
     <!-- Columna Energía -->
     <div style="flex: 1; min-width: 250px;">
       <h3>Datos de Energía</h3>
-      <label>Num columnas placas (módulos por string):</label>
+      <label>Num columnas paneles (módulos por string):</label>
       <input type="number" id="nCols" placeholder="Ej: 2" value="4">
 
       <label>Separación entre columnas (m):</label>
       <input type="number" id="sepX" placeholder="Ej: 3" value="0.1">
 
-      <label>Num filas placas (número de strings):</label>
-      <input type="number" id="nFilas" placeholder="Ej: 3" value="5">
+      <label>Num filas paneles (número de strings):</label>
+      <input type="number" id="nFilas" placeholder="Ej: 3" value="3">
 
       <label>Separación entre filas (m):</label>
-      <input type="number" id="sepY" placeholder="Ej: 3" value="5">
+      <input type="number" id="sepY" placeholder="Ej: 3" value="2">
 
       <label>Transparencia paneles (%):</label>
       <input type="number" id="tau_dir" placeholder="Ej: 0.6" value="0">

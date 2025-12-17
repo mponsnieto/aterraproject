@@ -1,6 +1,6 @@
 function mostrarVisualizacion3D(datos) {
   if (typeof window.disableHelp === "function") window.disableHelp();
-  
+
   const container = document.getElementById("visualizacion3D");
   container.innerHTML = ""; // Limpiar si ya existe
 
@@ -99,7 +99,7 @@ function simularArreglo(datos) {
 
   const sepYmin = calcularSeparacionMinima(panelL, inclinacion, latitud, fecha_inicio);
   if (sepY < sepYmin) sepY = sepYmin;
-
+  console.log("SepY: ",sepY);
   const paneles = [];
 
   // Vectores base

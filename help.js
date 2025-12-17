@@ -27,19 +27,19 @@ const HELP = {
     meta: "Default: 1367 W/m²"
   },
   fecha_inicio: {
-    name: "Simulation start date",
-    desc: "First day included in the simulation period.",
-    meta: "Format: YYYY-MM-DD"
+    name: "Fecha de inicio",
+    desc: "Primer día incluido en la simulación.",
+    meta: "Formato: YYYY-MM-DD"
   },
   fecha_fin: {
-    name: "Simulation end date",
-    desc: "Last day included in the simulation period.",
-    meta: "Format: YYYY-MM-DD"
+    name: "Fecha de fin de simulación",
+    desc: "Último día incluido en la simulación",
+    meta: "Formato: YYYY-MM-DD"
   },
   day_interval: {
-    name: "Day interval",
-    desc: "Time step (in days) used to sample days within the simulation period.\nHigher values reduce computation time but lower temporal resolution.",
-    meta: "Typical: 1–10"
+    name: "Intervalo de días",
+    desc: "Paso del tiempo (en días) usado para avanzar en el periodo de simulación.\nValores más altos reducen el coste computacional aunque tienen disminuye la resolución temporal.",
+    meta: "Típico: 1–10"
   },
   hotel: {
     name: "Categoría del hotel",
@@ -47,29 +47,29 @@ const HELP = {
     meta: "Si se especifican los campos de demanda de alimento y energía, este campo no es relevante."
   },
   foodDemand: {
-    name: "Demanda del cultivo seleccionado para un hotel concreto (kg)",
+    name: "Demanda específica de alimentos y energía (kg y kWh por periodo)",
     desc: "Este dato permitirá comparar la producción energética y el consumo del cultivo con los parámetros medios para un establecimiento de la misma tipología.",
     meta: "Si se especifican los campos de demanda de alimento y energía, este campo no es relevante."
   },
   nFilas: {
-    name: "Number of PV rows",
-    desc: "Number of panel rows in the layout.",
-    meta: "Integer ≥ 1"
+    name: "Numero de filas de paneles solar",
+    desc: "Numero de filas de placas/strings contempladas en la simulación.",
+    meta: "Número entero ≥ 1"
   },
   nCols: {
-    name: "Number of PV columns",
-    desc: "Number of panels per row (columns).",
-    meta: "Integer ≥ 1"
+    name: "Numero de columnas de paneles solar",
+    desc: "Numero de columnas de placas contempladas en la simulación.",
+    meta: "Número entero ≥ 1"
   },
   sepX: {
-    name: "Row-wise spacing (m)",
-    desc: "Spacing between panels along the X direction (between columns).",
-    meta: "Typical: 0.2–3 m"
+    name: "Separación entre columnas (m)",
+    desc: "Distancia entre paneles sobre el eje X (entre columnas).",
+    meta: "Típico: 0.2–3 m"
   },
   sepY: {
-    name: "Inter-row spacing (m)",
-    desc: "Spacing between rows along the Y direction.\nStrongly affects shading and land use.",
-    meta: "Typical: 1–10 m"
+    name: "Separación entre filas (m)",
+    desc: "Distancia entre paneles sobre el eje Y (entre filas).",
+    meta: "Típico: 1–10 m"
   },
   panelW: {
     name: "Dimensiones del panel: alto y ancho (m)",
@@ -104,7 +104,7 @@ const HELP = {
     </a>
     `
     ,
-    meta: "Categorías: lechuga, tomate, sandía"
+    meta: "Categorías: lechuga, tomate, calabacín, patata, fresa, sandía, pimiento"
   },
   yieldBase: {
     name: "Rendimiento del cultivo base (kg/ha)",
@@ -114,6 +114,11 @@ const HELP = {
     </a>
     `,
     meta: "Typical: lettuce, tomato, zucchini"
+  },
+  efficiency: {
+    name: "Eficiencia del sistema (%)",
+    desc: "Porcentaje de radiación solar que se transforma en electricidad utilizable. ",
+    meta: "Rango: 14% - 23%"
   },
   weather: {
     name: "Modelo de clima",

@@ -10,9 +10,15 @@ async function calculate() {
     const fecha_fin = new Date(document.getElementById('fecha_fin').value);
     const day_interval = parseFloat(document.getElementById('day_interval').value);
     const weather = document.getElementById('weather').value;
+    clima = "";
+    if (weather === "teorico"){
+      clima = "Teórico: Modelo  de distribución isotrópica de Liu y Jordan 1962";
+    }else{
+      clima = "PVGIS con interpolaciones cada 15min";
+    }
     
     //Datos de ubicación
-    const area = parseFloat(document.getElementById('area').value);
+    const area = parseFloat(document.getElementById('area').value*10000);
     const latitud =  parseFloat(document.getElementById('latitud').value);  //Latitud del lugar (positiva en el hemisferio norte) (grados decimales)
     const longitud =  parseFloat(document.getElementById('longitud').value);  //Longitud del lugar (positiva hacia el este) (grados decimales)
     const malla = parseFloat(document.getElementById('resolucion_malla').value)
@@ -27,7 +33,7 @@ async function calculate() {
     const nCols = parseFloat(document.getElementById('nCols').value); // Cantidad de columnas de paneles en el arreglo
     const sepX = parseFloat(document.getElementById('sepX').value); //; % Distancia entre columnas de paneles (m)    
     const sepY = parseFloat(document.getElementById('sepY').value); // % Distancia entre filas de paneles (m)  
-    const margen = 0.5; // % margen del terreno a los cuatro lados del arreglo de pv (m)
+    const margen = 2; // % margen del terreno a los cuatro lados del arreglo de pv (m)
     const panelW = parseFloat(document.getElementById('panelW').value); // % Dimensión horizontal del panel (de lado a lado) (m)
     const panelH = parseFloat(document.getElementById('panelH').value); // % Dimensión vertical del panel (desde base a vértice superior) (m) 
     const h_pv = parseFloat(document.getElementById('h_pv').value); // Altura desde el suelo hasta el borde inferior del panel (m) 
@@ -52,6 +58,23 @@ async function calculate() {
       return;
     }
 
+    // 1. Leer la tabla desde el archivo CSV
+    const tablaCultivos = parseCSV(read_clasificacion_clutivos());
+    // tabla es un array de objetos: [{Cultivo: "Patata", Grupo: "Alta"}, ...]
+    
+    // LEER TABLA DE PARÁMETROS YIELD=f(RSR) PARA LOS DIFERENTES GRUPOS
+    const Ecuaciones_CrecimVeg = read_Ecuaciones_CrecimVeg();
+    
+    // 2. Buscar el grupo correspondiente al nombre del cultivo
+    const idx = tablaCultivos.findIndex(row => row.Cultivo.toLowerCase() === crop);
+
+    // 3. Comprobar si se ha encontrado y mostrar el grupo
+    let grupo = 0;
+    let coefsGrupo = 0;
+    if (idx !== -1) {
+      grupo = tablaCultivos[idx].Grupo;
+      console.log(`El cultivo "${crop}" presenta una tolerancia a la sombra "${grupo}".`);
+    }
 
     // Mostrar datos introducidos
     const inputSummary = document.getElementById('inputSummary');
@@ -60,11 +83,11 @@ async function calculate() {
       <li><strong>Superficie total:</strong> ${area} m²</li>
       <li><strong>Superficie FV:</strong> ${coverage} m²</li>
       <li><strong>Coordenadas:</strong> ${latitud}, ${longitud}</li>
+      <li><strong>Modelo de clima:</strong> ${clima}</li>
+      <li><strong>Tipo de cultivo:</strong> ${crop}. Este cultivo tiene una tolerancia a la sombra de tipo: ${grupo}</li>
       <li><strong>Albedo:</strong> ${albedo}</li>
-      <li><strong>Tipo de cultivo:</strong> ${crop}</li>
       <li><strong>Rendimiento base:</strong> ${yieldBase} kg/ha</li>
-      <li><strong>Precio venta energía:</strong> ${price} €/kWh</li>
-      <li><strong>Modelo de clima:</strong> ${weather}</li>
+      <li><strong>Precio de la energía energía:</strong> ${price} €/kWh</li>
       <li><strong>Fecha simulación:</strong> ${fecha_inicio.toISOString().split('T')[0]} → ${fecha_fin.toISOString().split('T')[0]}</li>
       <li><strong>Transparencia paneles FV:</strong> ${tau_dir*100}%</li>
       <li><strong>Eficiencia FV:</strong> ${efficiency*100}%</li>
@@ -98,7 +121,7 @@ async function calculate() {
     fd,
     malla,
     efficiency,
-    area: parseFloat(document.getElementById('area').value),
+    area: parseFloat(document.getElementById('area').value)*10000,
     orientacion: parseFloat(document.getElementById("gamma").value)
     };
 

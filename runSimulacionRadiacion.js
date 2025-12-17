@@ -475,14 +475,14 @@ function renderEnergiaPorMes(labels, values){
   });
 }
 
-function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
+/*function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
   console.log("--------E_terreno_total---",E_terreno_total)
   const canvas = document.createElement("canvas");
     
   const padding = 50; // espacio para etiquetas
   const scale = 4;
-  const width = xgv.length * scale + padding*2;
-  const height = ygv.length * scale + padding;
+  //const width = xgv.length * scale + padding*2;
+  //const height = ygv.length * scale + padding;
   const width_legend = 30;
 
   canvas.width = width+(width_legend*2);
@@ -506,12 +506,33 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
 
 
   // Dibujar heatmap
+  const xMin = xgv[0];
+  const xMax = xgv[xgv.length - 1];
+  const yMin = ygv[0];
+  const yMax = ygv[ygv.length - 1];
+
+  const Lx = xMax - xMin; // metros
+  const Ly = yMax - yMin; // metros
+  const pxPerMeter = 25; // ajustable
+  const mapWidth  = Lx * pxPerMeter;
+  const mapHeight = Ly * pxPerMeter;
+
+  const width  = mapWidth  + padding * 2;
+  const height = mapHeight + padding;
+
   for (let i = 0; i < nCols; i++) {
     for (let j = 0; j < nRows; j++) {
       const val = E_terreno_total[j][i];
       ctx.fillStyle = getColor(val);
       const y = (nRows - j - 1) * scale;
-      ctx.fillRect(padding + i * scale, y, scale, scale);
+      //ctx.fillRect(padding + i * scale, y, scale, scale);
+      const dx = (xgv[1] - xgv[0]) * pxPerMeter;
+      const dy = (ygv[1] - ygv[0]) * pxPerMeter;
+
+      const xPix = padding + (xgv[i] - xMin) * pxPerMeter;
+      const yPix = (mapHeight - (ygv[j] - yMin) * pxPerMeter);
+
+      ctx.fillRect(xPix, yPix, dx, dy);
     }
   }
 
@@ -609,6 +630,257 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles){
   titulo.style.marginBottom = "10px";
   container.appendChild(titulo);
 
+  container.appendChild(canvas);
+}*/
+
+function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles) {
+   console.log(">>> NUEVA mostrarMapaEnergia ejecutándose (v2)");
+  const container = document.getElementById("visualRadiacion");
+  container.innerHTML = "";
+
+  // --- Título ---
+  const titulo = document.createElement("h3");
+  titulo.textContent = "Energía acumulada en el terreno (kWh/m²)";
+  titulo.style.textAlign = "center";
+  titulo.style.marginBottom = "10px";
+  container.appendChild(titulo);
+
+  // --- Validaciones ---
+  if (!Array.isArray(xgv) || !Array.isArray(ygv) || !Array.isArray(E_terreno_total)) {
+    container.appendChild(document.createTextNode("Datos inválidos para el mapa de calor."));
+    return;
+  }
+  const nCols = xgv.length;
+  const nRows = ygv.length;
+  if (nCols < 2 || nRows < 2) {
+    container.appendChild(document.createTextNode("xgv/ygv deben tener al menos 2 valores."));
+    return;
+  }
+
+  // --- Dominio físico (m) ---
+  const xMin = xgv[0], xMax = xgv[nCols - 1];
+  const yMin = ygv[0], yMax = ygv[nRows - 1];
+  const Lx = xMax - xMin;
+  const Ly = yMax - yMin;
+
+  // --- Resolución física por celda (m) ---
+  const dx_m = xgv[1] - xgv[0];
+  const dy_m = ygv[1] - ygv[0];
+
+  // --- Min/Max robustos (ignorar NaN) ---
+  const flatVals = E_terreno_total.flat().filter(Number.isFinite);
+  if (flatVals.length === 0) {
+    container.appendChild(document.createTextNode("E_terreno_total no contiene valores numéricos válidos."));
+    return;
+  }
+  const minVal = Math.min(...flatVals);
+  const maxVal = Math.max(...flatVals);
+
+  // --- Layout del canvas ---
+  const paddingLeft = 60;   // eje Y + ticks
+  const paddingBottom = 55; // eje X + ticks
+  const paddingTop = 10;
+
+  // Escala métrica: px por metro (ajustable)
+  const pxPerMeter = 20; // sube si lo quieres más grande
+
+  const mapW = Math.max(1, Lx * pxPerMeter);
+  const mapH = Math.max(1, Ly * pxPerMeter);
+
+  const legendW = 20;
+  const legendGap = 16;
+  const legendTextW = 60;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.ceil(paddingLeft + mapW + legendGap + legendW + legendTextW + 10);
+  canvas.height = Math.ceil(paddingTop + mapH + paddingBottom);
+
+  const ctx = canvas.getContext("2d");
+
+  // Fondo blanco (por si el contenedor tiene color)
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // --- Colormap: azul oscuro -> verde (medio) -> amarillo (alto) ---
+  function getColor(v) {
+    if (!Number.isFinite(v)) return "rgb(220,220,220)";
+    const denom = (maxVal - minVal);
+    const ratio = denom === 0 ? 0.5 : (v - minVal) / denom;
+
+    // 0 => azul, 0.5 => verde, 1 => amarillo
+    const t = Math.max(0, Math.min(1, ratio));
+    let r, g, b;
+
+    if (t < 0.5) {
+      const u = t / 0.5;       // 0..1
+      r = 0;
+      g = Math.round(200 * u); // sube hacia verde
+      b = Math.round(160 + 95 * (1 - u)); // azul -> algo menos azul
+    } else {
+      const u = (t - 0.5) / 0.5;
+      r = Math.round(255 * u); // verde -> amarillo (sube rojo)
+      g = 255;
+      b = Math.round(160 * (1 - u)); // baja azul
+    }
+    return `rgb(${r},${g},${b})`;
+  }
+
+  // --- Helpers coordenadas físicas -> píxel ---
+  // Mapeo: x aumenta a la derecha; y aumenta hacia arriba
+  const Xpix = (x_m) => paddingLeft + (x_m - xMin) * pxPerMeter;
+  const Ypix = (y_m) => paddingTop + (yMax - y_m) * pxPerMeter; // invertido
+
+  // Tamaño de cada celda en píxeles (según dx_m/dy_m reales)
+  const cellW = Math.max(1, dx_m * pxPerMeter);
+  const cellH = Math.max(1, dy_m * pxPerMeter);
+
+  // --- Dibujar heatmap (por coordenadas físicas reales) ---
+  for (let j = 0; j < nRows; j++) {
+    const row = E_terreno_total[j];
+    const y0 = ygv[j];
+    for (let i = 0; i < nCols; i++) {
+      const val = row?.[i];
+      ctx.fillStyle = getColor(val);
+      const x0 = xgv[i];
+
+      // rectángulo de celda, anclado en (x0, y0)
+      // Ojo: queremos que ocupe hacia +x y hacia +y
+      // En píxel, +y es hacia abajo, así que usamos Ypix(y0 + dy_m)
+      const x = Xpix(x0);
+      const y = Ypix(y0 + dy_m);
+
+      ctx.fillRect(x, y, cellW, cellH);
+    }
+  }
+
+  // --- Dibujar paneles (proyección en X-Y) ---
+  if (Array.isArray(paneles)) {
+    ctx.fillStyle = "rgba(180,180,255,0.6)";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
+
+    for (const p of paneles) {
+      if (!p?.PL || !p?.PR || !p?.TL || !p?.TR) continue;
+
+      const xs = [p.PL[0], p.PR[0], p.TL[0], p.TR[0]];
+      const ys = [p.PL[1], p.PR[1], p.TL[1], p.TR[1]];
+
+      const px0 = Math.min(...xs), px1 = Math.max(...xs);
+      const py0 = Math.min(...ys), py1 = Math.max(...ys);
+
+      const x = Xpix(px0);
+      const y = Ypix(py1); // top (y mayor)
+      const w = Math.max(1, (px1 - px0) * pxPerMeter);
+      const h = Math.max(1, (py1 - py0) * pxPerMeter);
+
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+    }
+  }
+
+  // --- Ejes ---
+  const xAxisY = paddingTop + mapH;
+  const yAxisX = paddingLeft;
+
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(yAxisX, paddingTop);
+  ctx.lineTo(yAxisX, xAxisY);
+  ctx.lineTo(paddingLeft + mapW, xAxisY);
+  ctx.stroke();
+
+  // --- Títulos de ejes ---
+  ctx.fillStyle = "black";
+  ctx.font = "12px Arial";
+
+  // X title
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText("X (m)", paddingLeft + mapW / 2, xAxisY + 28);
+
+  // Y title
+  ctx.save();
+  ctx.translate(18, paddingTop + mapH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText("Y (m)", 0, 0);
+  ctx.restore();
+
+  // --- Ticks X/Y (10 aprox) ---
+  const tickCount = 10;
+
+  // X ticks
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  for (let k = 0; k <= tickCount; k++) {
+    //--- X ticks: solo enteros (m) y no demasiados ---
+    const xStart = Math.ceil(xMin);
+    const xEnd = Math.floor(xMax);
+
+    // decide cada cuántos metros dibujar (para que no se amontonen)
+    const maxXTicks = 10; // objetivo: no más de ~10 etiquetas
+    const span = Math.max(1, xEnd - xStart);
+    const step = Math.max(1, Math.ceil(span / maxXTicks));
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    for (let xInt = xStart; xInt <= xEnd; xInt += step) {
+      const x = Xpix(xInt);
+
+      // marca
+      ctx.beginPath();
+      ctx.moveTo(x, xAxisY);
+      ctx.lineTo(x, xAxisY + 4);
+      ctx.stroke();
+
+      // etiqueta (entero)
+      ctx.fillText(String(xInt), x, xAxisY + 8);
+    }
+  }
+
+  // Y ticks
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  for (let k = 0; k <= tickCount; k++) {
+    const y_m = yMin + (Ly * k) / tickCount;
+    const y = Ypix(y_m);
+    ctx.beginPath();
+    ctx.moveTo(yAxisX - 4, y);
+    ctx.lineTo(yAxisX, y);
+    ctx.stroke();
+    ctx.fillText(y_m.toFixed(1), yAxisX - 6, y);
+  }
+
+  // --- Leyenda vertical ---
+  const legendX = paddingLeft + mapW + legendGap;
+  const legendY = paddingTop;
+  const legendH = mapH;
+
+  const grad = ctx.createLinearGradient(0, legendY, 0, legendY + legendH);
+  grad.addColorStop(0, getColor(maxVal));
+  grad.addColorStop(1, getColor(minVal));
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(legendX, legendY, legendW, legendH);
+  ctx.strokeStyle = "black";
+  ctx.strokeRect(legendX, legendY, legendW, legendH);
+
+  // ticks leyenda
+  ctx.fillStyle = "black";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  const nTicksLegend = 9;
+  for (let i = 0; i < nTicksLegend; i++) {
+    const t = i / (nTicksLegend - 1);
+    const y = legendY + t * legendH;
+    const val = maxVal - t * (maxVal - minVal);
+    ctx.fillText(val.toFixed(1), legendX + legendW + 8, y);
+  }
+
+  // Añadir canvas (se centrará con tu CSS flex en #visualRadiacion)
   container.appendChild(canvas);
 }
 

@@ -719,7 +719,7 @@ function mostrarMapaEnergia(xgv, ygv, E_terreno_total, paneles) {
   ctx.fillStyle = "black";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  const nTicksLegend = 9;
+  const nTicksLegend = 17;
   for (let i = 0; i < nTicksLegend; i++) {
     const t = i / (nTicksLegend - 1);
     const y = legendY + t * legendH;

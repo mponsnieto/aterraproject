@@ -74,10 +74,6 @@ async function calculate() {
     let coefsGrupo = 0;
     if (idx !== -1) {
       grupo = tablaCultivos[idx].Grupo;
-      if (foodDemand === 0){
-        const demanda_cultivo = tablaCultivos[idx].Demanda;
-        const energiaHotel = CATEGORIAS_ENERGIA[hotel];
-      }
     }
 
     // Mostrar datos introducidos
@@ -150,14 +146,12 @@ async function calculate() {
 
     if (foodDemand === 0){
       const demanda_cultivo = tablaCultivos[idx].Demanda;
-      //const tablaHoteles = parseCSV(read_categorias_energia()).findIndex(row => row.Estrellas.toLowerCase() === hotel);
       const energiaHotel = CATEGORIAS_ENERGIA[hotel];
-      //const energia_hotel = tablaHoteles.Energia; 
-      foodDemand = beds*200*demanda_cultivo;
+      foodDemand = beds*200*demanda_cultivo; //se suponen 200 días abiertos al año
       energyDemand = energiaHotel;
       console.log("energyDemand",energyDemand,hotel);
     }
-    const portion_food = (resultados.cropProduction.toFixed(0)+resultados.cropProduction_free.toFixed(0))/foodDemand;
+    const portion_food = (resultados.cropProduction.toFixed(0)+resultados.cropProduction_free.toFixed(0))/foodDemand*100;
     const portion_energy = productionAnnual/energyDemand*100;
 
     document.getElementById('portion_food').textContent = portion_food.toFixed(2);
@@ -168,7 +162,7 @@ async function calculate() {
     document.getElementById('results').style.display = 'block';
     hideLoader();
     if (chart) chart.destroy();
-    const ctx = document.getElementById('resultsChart').getContext('2d');
+    /*const ctx = document.getElementById('resultsChart').getContext('2d');
     chart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -185,7 +179,7 @@ async function calculate() {
           y: { beginAtZero: true }
         }
       }
-    });
+    });*/
 
 
     // Mostrar resultado
